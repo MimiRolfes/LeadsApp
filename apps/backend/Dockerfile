@@ -35,11 +35,14 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 RUN groupadd --system --gid 1001 nodejs \
-  && useradd --system --uid 1001 --gid nodejs app
+  && useradd --system --uid 1001 --gid nodejs app \
+  && mkdir -p /app/.data/uploads \
+  && chown -R app:nodejs /app/.data
 
 COPY --from=build --chown=app:nodejs /repo/apps/backend/dist ./dist
 
 USER app
+VOLUME ["/app/.data"]
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \

@@ -38,8 +38,32 @@ export type RegisterInput = z.infer<typeof RegisterInputSchema>;
 export const LoginInputSchema = z.object({
   email: emailField,
   password: z.string().min(1).max(PASSWORD_MAX_LENGTH),
+  /** TOTP-Code, falls für das Konto 2FA aktiv ist. */
+  code: z
+    .string()
+    .regex(/^\d{6}$/)
+    .optional(),
 });
 export type LoginInput = z.infer<typeof LoginInputSchema>;
+
+export const PasswordForgotSchema = z.object({ email: emailField });
+export type PasswordForgot = z.infer<typeof PasswordForgotSchema>;
+
+export const PasswordResetSchema = z.object({
+  token: z.string().min(10).max(200),
+  password: passwordField,
+});
+export type PasswordReset = z.infer<typeof PasswordResetSchema>;
+
+const totpCode = z.string().regex(/^\d{6}$/, "Sechsstelliger Code.");
+export const TotpEnableSchema = z.object({
+  secret: z.string().min(16).max(64),
+  code: totpCode,
+});
+export type TotpEnable = z.infer<typeof TotpEnableSchema>;
+
+export const TotpCodeSchema = z.object({ code: totpCode });
+export type TotpCode = z.infer<typeof TotpCodeSchema>;
 
 export const CurrentUserSchema = z.object({
   id: z.string().uuid(),

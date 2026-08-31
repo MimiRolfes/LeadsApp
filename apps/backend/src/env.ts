@@ -80,6 +80,12 @@ const EnvSchema = z.object({
     .int()
     .positive()
     .default(10 * 1024 * 1024),
+  /**
+   * Ohne echten Virenscanner: `auto` markiert Uploads außerhalb von
+   * Produktion sofort als "clean", in Produktion bleiben sie "pending"
+   * (manuelle Freigabe / späterer Scan-Hook). `true`/`false` erzwingen.
+   */
+  UPLOAD_AUTO_APPROVE: z.enum(["auto", "true", "false"]).default("auto"),
   S3_ENDPOINT: z.string().url().optional(),
   S3_REGION: z.string().optional(),
   S3_BUCKET: z.string().optional(),
@@ -87,6 +93,8 @@ const EnvSchema = z.object({
   S3_SECRET_ACCESS_KEY: z.string().optional(),
 
   // --- E-Mail (Passwort-Reset) ---
+  MAIL_DRIVER: z.enum(["log", "smtp"]).default("log"),
+  PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().positive().default(60),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.coerce.number().int().positive().max(65535).default(587),
   SMTP_USER: z.string().optional(),
@@ -151,6 +159,13 @@ export function sessionCookieSecure(): boolean {
   if (env.SESSION_COOKIE_SECURE === "true") return true;
   if (env.SESSION_COOKIE_SECURE === "false") return false;
   return env.NODE_ENV === "production";
+}
+
+/** Ob neue Uploads sofort als "clean" gelten (kein AV-Scanner angebunden). */
+export function uploadAutoApprove(): boolean {
+  if (env.UPLOAD_AUTO_APPROVE === "true") return true;
+  if (env.UPLOAD_AUTO_APPROVE === "false") return false;
+  return env.NODE_ENV !== "production";
 }
 
 export function corsOrigins(): string[] {

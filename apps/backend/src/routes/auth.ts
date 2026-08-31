@@ -1,17 +1,33 @@
 import { Hono, type Context } from "hono";
 import { deleteCookie, setCookie } from "hono/cookie";
 import { zValidator } from "@hono/zod-validator";
-import { LoginInputSchema, RegisterInputSchema } from "@humatter-leads/shared";
+import {
+  LoginInputSchema,
+  PasswordForgotSchema,
+  PasswordResetSchema,
+  RegisterInputSchema,
+  TotpCodeSchema,
+  TotpEnableSchema,
+} from "@humatter-leads/shared";
 import { env, sessionCookieSecure } from "../env";
 import type { AppEnv } from "../types";
 import { requireAuth } from "../auth/middleware";
-import { authenticateUser, registerUser, toCurrentUser } from "../auth/service";
+import {
+  authenticateUser,
+  disableTotp,
+  enableTotp,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  toCurrentUser,
+} from "../auth/service";
 import {
   createSession,
   revokeAllSessionsForUser,
   revokeSession,
 } from "../auth/session";
 import { clientIp, rateLimit } from "../lib/rate-limit";
+import { generateSecret, otpauthUri } from "../lib/totp";
 import { onInvalid } from "../lib/validation";
 
 /**
@@ -85,5 +101,73 @@ auth.post("/logout-all", requireAuth, async (c) => {
 });
 
 auth.get("/me", requireAuth, (c) => {
-  return c.json({ user: toCurrentUser(c.get("user")!) });
+  const user = c.get("user")!;
+  return c.json({
+    user: toCurrentUser(user),
+    twoFactorEnabled: user.totpSecret != null,
+  });
 });
+
+// --- Passwort-Reset ---------------------------------------------
+
+auth.post(
+  "/password/forgot",
+  rateLimit({ name: "auth:forgot", windowSeconds: 3600, max: 5 }),
+  zValidator("json", PasswordForgotSchema, onInvalid),
+  async (c) => {
+    await requestPasswordReset(c.get("db"), c.req.valid("json").email, {
+      ip: clientIp(c),
+    });
+    // immer gleich — kein Rückschluss, ob die E-Mail existiert
+    return c.json({ status: "accepted" }, 202);
+  },
+);
+
+auth.post(
+  "/password/reset",
+  rateLimit({ name: "auth:reset", windowSeconds: 900, max: 10 }),
+  zValidator("json", PasswordResetSchema, onInvalid),
+  async (c) => {
+    const { token, password } = c.req.valid("json");
+    await resetPassword(c.get("db"), { token, password, ip: clientIp(c) });
+    return c.body(null, 204);
+  },
+);
+
+// --- 2FA (TOTP, optional) --------------------------------------
+
+auth.post("/2fa/setup", requireAuth, (c) => {
+  const secret = generateSecret();
+  return c.json({
+    secret,
+    otpauthUri: otpauthUri(secret, c.get("user")!.email),
+  });
+});
+
+auth.post(
+  "/2fa/enable",
+  requireAuth,
+  zValidator("json", TotpEnableSchema, onInvalid),
+  async (c) => {
+    const { secret, code } = c.req.valid("json");
+    await enableTotp(c.get("db"), {
+      userId: c.get("user")!.id,
+      secret,
+      code,
+    });
+    return c.json({ twoFactorEnabled: true });
+  },
+);
+
+auth.post(
+  "/2fa/disable",
+  requireAuth,
+  zValidator("json", TotpCodeSchema, onInvalid),
+  async (c) => {
+    await disableTotp(c.get("db"), {
+      user: c.get("user")!,
+      code: c.req.valid("json").code,
+    });
+    return c.body(null, 204);
+  },
+);

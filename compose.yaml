@@ -95,8 +95,15 @@ services:
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
       ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-mindsewn.de}
       ADMIN_EMAILS: ${ADMIN_EMAILS:-}
+      MAIL_DRIVER: ${MAIL_DRIVER:-log}
+      UPLOAD_DRIVER: ${UPLOAD_DRIVER:-local}
+      UPLOAD_LOCAL_DIR: /app/.data/uploads
+      UPLOAD_AUTO_APPROVE: ${UPLOAD_AUTO_APPROVE:-auto}
       RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
       RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-120}
+    volumes:
+      # Persistente Uploads (nur relevant bei UPLOAD_DRIVER=local).
+      - uploads:/app/.data
     networks: [backend_net, web_net]
     depends_on:
       db:
@@ -134,3 +141,4 @@ networks:
 
 volumes:
   db_data:
+  uploads:

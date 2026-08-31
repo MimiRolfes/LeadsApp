@@ -25,6 +25,7 @@ import {
 import { createFollowup } from "../domain/followups";
 import { mergeLeads } from "../domain/merge";
 import { anonymizeLead, eraseLead, subjectAccess } from "../domain/dsgvo";
+import { createAttachment, listLeadAttachments } from "../domain/attachments";
 import { errors } from "../lib/errors";
 import { onInvalid } from "../lib/validation";
 
@@ -126,6 +127,35 @@ leadRoutes.post(
     return c.json({ lead });
   },
 );
+
+// --- Anhänge ---------------------------------------------------
+
+leadRoutes.get("/:leadId/attachments", async (c) => {
+  const ref = await loadRef(c);
+  assertCanViewLead(c.get("authz")!, ref.eventId, ref.ownerId);
+  return c.json({
+    attachments: await listLeadAttachments(c.get("db"), ref.id),
+  });
+});
+
+leadRoutes.post("/:leadId/attachments", async (c) => {
+  const ref = await loadRef(c);
+  assertCanEditLead(c.get("authz")!, ref.eventId, ref.ownerId);
+  const body = await c.req.parseBody();
+  const file = body["file"];
+  if (!(file instanceof File)) {
+    throw errors.badRequest("no_file", "Feld 'file' (multipart) fehlt.");
+  }
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  const attachment = await createAttachment(c.get("db"), {
+    actorId: c.get("user")!.id,
+    leadId: ref.id,
+    eventId: ref.eventId,
+    bytes,
+    originalFilename: file.name,
+  });
+  return c.json({ attachment }, 201);
+});
 
 // --- Betroffenenrechte (DSGVO) --------------------------------
 
