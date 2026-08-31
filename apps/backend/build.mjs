@@ -11,6 +11,7 @@ await build({
     server: "src/server.ts",
     migrate: "src/db/migrate.ts",
     seed: "src/db/seed.ts",
+    retention: "src/jobs/retention.ts",
   },
   outdir: "dist",
   bundle: true,

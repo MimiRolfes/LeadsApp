@@ -4,6 +4,7 @@ import {
   EventCreateSchema,
   EventMemberAddSchema,
   EventUpdateSchema,
+  ExportRequestSchema,
   FollowupListQuerySchema,
   FollowupTemplateCreateSchema,
   LeadCreateSchema,
@@ -15,6 +16,7 @@ import type { AppEnv } from "../types";
 import { requireAuthz } from "../auth/middleware";
 import {
   assertCanCaptureLead,
+  assertCanExport,
   assertCanManageEvent,
   assertCanManageQuestions,
   assertCanViewEvent,
@@ -26,6 +28,8 @@ import {
   listEventFollowups,
   listTemplates,
 } from "../domain/followups";
+import { exportEventLeads } from "../domain/export";
+import { eventStats } from "../domain/stats";
 import { clientIp } from "../lib/rate-limit";
 import {
   addMember,
@@ -295,5 +299,34 @@ eventsRoutes.post(
       input: c.req.valid("json"),
     });
     return c.json({ template }, 201);
+  },
+);
+
+// --- Reporting + Export ----------------------------------------
+
+eventsRoutes.get("/:eventId/stats", async (c) => {
+  const event = await loadVisibleEvent(c);
+  return c.json(await eventStats(c.get("db"), event.id));
+});
+
+eventsRoutes.post(
+  "/:eventId/exports",
+  zValidator("json", ExportRequestSchema, onInvalid),
+  async (c) => {
+    const eventId = paramOr404(c, "eventId");
+    assertCanExport(c.get("authz")!, eventId);
+    const result = await exportEventLeads(c.get("db"), {
+      actorId: c.get("user")!.id,
+      eventId,
+      input: c.req.valid("json"),
+    });
+    return new Response(result.body, {
+      status: 200,
+      headers: {
+        "content-type": result.contentType,
+        "content-disposition": `attachment; filename="${result.filename}"`,
+        "x-row-count": String(result.rowCount),
+      },
+    });
   },
 );

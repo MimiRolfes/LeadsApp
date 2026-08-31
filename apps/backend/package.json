@@ -11,7 +11,8 @@
     "test": "vitest run",
     "db:generate": "drizzle-kit generate --config=./drizzle.config.ts",
     "db:migrate": "tsx src/db/migrate.ts",
-    "db:seed": "tsx src/db/seed.ts"
+    "db:seed": "tsx src/db/seed.ts",
+    "db:retention": "tsx src/jobs/retention.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.14.0",

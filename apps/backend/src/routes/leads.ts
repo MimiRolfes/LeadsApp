@@ -2,12 +2,19 @@ import { Hono, type Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import {
   FollowupCreateSchema,
+  LeadDeleteSchema,
+  LeadMergeSchema,
   LeadNoteCreateSchema,
   LeadUpdateSchema,
 } from "@humatter-leads/shared";
 import type { AppEnv } from "../types";
 import { requireAuthz } from "../auth/middleware";
-import { assertCanEditLead, assertCanViewLead } from "../authz";
+import {
+  assertCanEditLead,
+  assertCanMergeLeads,
+  assertCanRunDsgvoAction,
+  assertCanViewLead,
+} from "../authz";
 import {
   addLeadNote,
   getLeadDetail,
@@ -16,6 +23,8 @@ import {
   updateLead,
 } from "../domain/leads";
 import { createFollowup } from "../domain/followups";
+import { mergeLeads } from "../domain/merge";
+import { anonymizeLead, eraseLead, subjectAccess } from "../domain/dsgvo";
 import { errors } from "../lib/errors";
 import { onInvalid } from "../lib/validation";
 
@@ -97,5 +106,51 @@ leadRoutes.post(
       input: c.req.valid("json"),
     });
     return c.json({ followup }, 201);
+  },
+);
+
+// --- Merge -------------------------------------------------------
+
+leadRoutes.post(
+  "/:leadId/merge",
+  zValidator("json", LeadMergeSchema, onInvalid),
+  async (c) => {
+    const ref = await loadRef(c);
+    assertCanMergeLeads(c.get("authz")!, ref.eventId);
+    const lead = await mergeLeads(c.get("db"), {
+      actorId: c.get("user")!.id,
+      survivingLeadId: ref.id,
+      eventId: ref.eventId,
+      input: c.req.valid("json"),
+    });
+    return c.json({ lead });
+  },
+);
+
+// --- Betroffenenrechte (DSGVO) --------------------------------
+
+leadRoutes.get("/:leadId/data", async (c) => {
+  const ref = await loadRef(c);
+  assertCanRunDsgvoAction(c.get("authz")!, ref.eventId);
+  return c.json(await subjectAccess(c.get("db"), ref.id));
+});
+
+leadRoutes.post(
+  "/:leadId/delete",
+  zValidator("json", LeadDeleteSchema, onInvalid),
+  async (c) => {
+    const ref = await loadRef(c);
+    assertCanRunDsgvoAction(c.get("authz")!, ref.eventId);
+    const args = {
+      actorId: c.get("user")!.id,
+      leadId: ref.id,
+      eventId: ref.eventId,
+    };
+    if (c.req.valid("json").mode === "erase") {
+      await eraseLead(c.get("db"), args);
+    } else {
+      await anonymizeLead(c.get("db"), args);
+    }
+    return c.body(null, 204);
   },
 );

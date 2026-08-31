@@ -65,6 +65,45 @@ export const LeadNoteCreateSchema = z.object({
 });
 export type LeadNoteCreate = z.infer<typeof LeadNoteCreateSchema>;
 
+export const LeadMergeSchema = z.object({
+  /** Der Lead, der in den aktuellen (überlebenden) einfließt und danach entfällt. */
+  mergedLeadId: z.string().uuid(),
+  /** Kontaktfelder, die vom `mergedLead` übernommen werden sollen. */
+  takeFields: z.array(z.string()).max(20).optional(),
+});
+export type LeadMerge = z.infer<typeof LeadMergeSchema>;
+
+export const EXPORT_LEAD_FIELDS = [
+  "firstName",
+  "lastName",
+  "company",
+  "position",
+  "email",
+  "phone",
+  "website",
+  "linkedin",
+  "country",
+  "language",
+  "source",
+  "priority",
+  "leadScore",
+  "legalBasis",
+  "consentStatus",
+  "createdAt",
+  "ownerId",
+] as const;
+
+export const ExportRequestSchema = z.object({
+  format: z.enum(["csv", "json"]),
+  fields: z.array(z.enum(EXPORT_LEAD_FIELDS)).min(1).optional(),
+});
+export type ExportRequest = z.infer<typeof ExportRequestSchema>;
+
+export const LeadDeleteSchema = z.object({
+  mode: z.enum(["anonymize", "erase"]),
+});
+export type LeadDelete = z.infer<typeof LeadDeleteSchema>;
+
 export const LeadListQuerySchema = z.object({
   scope: z.enum(["mine", "all"]).optional(),
   priority: z.enum(LEAD_PRIORITIES).optional(),

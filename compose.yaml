@@ -56,6 +56,23 @@ services:
     restart: "no"
     security_opt: ["no-new-privileges:true"]
 
+  # Retention-Lauf (docs/retention.md). NICHT automatisch — per Cron aufrufen:
+  #   docker compose run --rm retention
+  retention:
+    profiles: ["jobs"]
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: build
+    command: ["npm", "run", "db:retention", "-w", "@humatter-leads/backend"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      DATABASE_SSL: ${DATABASE_SSL:-disable}
+    networks: [backend_net]
+    restart: "no"
+    security_opt: ["no-new-privileges:true"]
+
   backend:
     build:
       context: .
