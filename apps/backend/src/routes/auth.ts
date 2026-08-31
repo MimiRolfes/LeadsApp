@@ -11,8 +11,8 @@ import {
   revokeAllSessionsForUser,
   revokeSession,
 } from "../auth/session";
-import { errors } from "../lib/errors";
 import { clientIp, rateLimit } from "../lib/rate-limit";
+import { onInvalid } from "../lib/validation";
 
 /**
  * Selbstregistrierung + Anmeldung.
@@ -23,15 +23,6 @@ import { clientIp, rateLimit } from "../lib/rate-limit";
  *   GET  /api/auth/me         aktueller Nutzer
  */
 export const auth = new Hono<AppEnv>();
-
-function onInvalid(result: { success: boolean; error?: unknown }): void {
-  if (!result.success) {
-    const flat = (
-      result.error as { flatten(): { fieldErrors: Record<string, string[]> } }
-    ).flatten();
-    throw errors.validation(flat.fieldErrors);
-  }
-}
 
 function setSessionCookie(c: Context<AppEnv>, token: string): void {
   setCookie(c, env.SESSION_COOKIE_NAME, token, {

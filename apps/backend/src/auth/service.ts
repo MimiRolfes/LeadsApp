@@ -6,10 +6,10 @@ import type {
 } from "@humatter-leads/shared";
 import { adminEmails, allowedEmailDomains } from "../env";
 import type { Db } from "../db/types";
-import { auditLog, users } from "../db/schema";
+import { users } from "../db/schema";
 import type { UserRow } from "./session";
+import { audit } from "../domain/audit";
 import { hashPassword, verifyPassword } from "../lib/password";
-import { hashOpaque } from "../lib/tokens";
 import { errors } from "../lib/errors";
 
 // Gültiger Argon2id-Hash eines Zufallswerts. Wird verglichen, wenn kein
@@ -43,7 +43,7 @@ export function toCurrentUser(u: UserRow): CurrentUser {
   };
 }
 
-async function writeAudit(
+function writeAudit(
   db: Db,
   entry: {
     actorId?: string | null;
@@ -53,14 +53,7 @@ async function writeAudit(
     metadata?: Record<string, unknown>;
   },
 ): Promise<void> {
-  await db.insert(auditLog).values({
-    actorId: entry.actorId ?? null,
-    action: entry.action,
-    entityType: "user",
-    entityId: entry.entityId ?? null,
-    ipHash: entry.ip ? await hashOpaque(entry.ip) : null,
-    metadata: entry.metadata ?? null,
-  });
+  return audit(db, { ...entry, entityType: "user" });
 }
 
 /**

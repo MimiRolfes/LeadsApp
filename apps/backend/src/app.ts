@@ -7,6 +7,7 @@ import type { Db } from "./db/types";
 import type { AppEnv } from "./types";
 import { sessionMiddleware } from "./auth/middleware";
 import { auth } from "./routes/auth";
+import { eventsRoutes } from "./routes/events";
 import { createHealthRoutes } from "./routes/health";
 import { ApiError, errors, toErrorResponse } from "./lib/errors";
 
@@ -68,6 +69,7 @@ export function createApp(deps: {
 
   const api = new Hono<AppEnv>();
   api.route("/auth", auth);
+  api.route("/events", eventsRoutes);
   app.route("/api", api);
 
   app.notFound((c) => c.json({ error: { code: "not_found" } }, 404));
