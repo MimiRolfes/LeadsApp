@@ -45,7 +45,23 @@ Monorepo (npm workspaces): `apps/frontend`, `apps/backend`, `packages/shared`.
 Stack: TypeScript strict · Next.js (App Router) · Hono · PostgreSQL · Drizzle
 (versionierte SQL-Migrationen) · Zod · Vitest.
 
-## Schnellstart mit Docker
+## Schnellstart — ohne Docker, ohne Postgres
+
+```bash
+npm install
+npm run dev          # backend :8080 (eingebettete DB) + frontend :3000
+```
+
+Dann <http://localhost:3000> öffnen, Konto anlegen (`@mindsewn.de`), loslegen.
+
+`npm run dev` setzt `DB_DRIVER=pglite`: das Backend nutzt eine eingebettete
+Datei-Datenbank (`apps/backend/.data/pglite/`, bleibt zwischen Neustarts
+erhalten), migriert automatisch. **Nur für Entwicklung** — Produktion nutzt
+immer echtes PostgreSQL.
+
+Optional fiktive Beispieldaten: `npm run db:seed:dev`.
+
+## Schnellstart mit Docker (produktionsnah)
 
 ```bash
 cp .env.example .env          # Werte anpassen (mind. POSTGRES_*, SESSION_SECRET)
@@ -55,23 +71,16 @@ docker compose up --build     # db → migrate → backend → frontend
 
 `db` und `backend` haben bewusst **keine** veröffentlichten Ports. Daten liegen
 im persistenten Volume `db_data` und überleben `docker compose down` / Rebuild.
+Seed: `docker compose run --rm migrate npm run db:seed -w @humatter-leads/backend`.
 
-### Seed (fiktive Daten)
-
-```bash
-docker compose run --rm migrate npm run db:seed -w @humatter-leads/backend
-```
-
-## Entwicklung ohne Container
+## Entwicklung gegen echtes Postgres (statt PGlite)
 
 ```bash
-npm install
-cp .env.example .env
 cp compose.override.yaml.example compose.override.yaml   # öffnet db-Port lokal
 docker compose up -d db
-# DATABASE_URL in .env auf localhost umstellen, dann:
+# in .env: DB_DRIVER=postgres, DATABASE_URL auf localhost, dann:
 npm run db:migrate && npm run db:seed
-npm run dev                    # backend :8080 + frontend :3000
+npm run dev:backend -w @humatter-leads/backend  # bzw. dev:postgres
 ```
 
 ### Nützliche Scripts (Repo-Wurzel)

@@ -90,7 +90,9 @@ eventsRoutes.post(
 
 eventsRoutes.get("/:eventId", async (c) => {
   const event = await loadVisibleEvent(c);
-  return c.json({ event });
+  const ctx = c.get("authz")!;
+  const myRole = ctx.isAdmin ? "admin" : (ctx.eventRole(event.id) ?? null);
+  return c.json({ event: { ...event, myRole } });
 });
 
 eventsRoutes.patch(

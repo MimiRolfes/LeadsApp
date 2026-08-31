@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "DB_DRIVER=pglite tsx watch src/server.ts",
+    "dev:postgres": "tsx watch src/server.ts",
     "build": "node build.mjs",
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
@@ -12,6 +13,7 @@
     "db:generate": "drizzle-kit generate --config=./drizzle.config.ts",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
+    "db:seed:dev": "DB_DRIVER=pglite tsx src/db/seed.ts",
     "db:retention": "tsx src/jobs/retention.ts"
   },
   "dependencies": {

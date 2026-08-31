@@ -17,10 +17,18 @@ async function main() {
       "Seed in Produktion blockiert. Setze SEED_ALLOW=true, wenn wirklich gewollt.",
     );
   }
+
+  if (env.DB_DRIVER === "pglite") {
+    const { initDevDb } = await import("./dev");
+    await seed(await initDevDb());
+    // eslint-disable-next-line no-console
+    console.log("Seed complete (PGlite, fictional data).");
+    return;
+  }
+
   if (!env.DATABASE_URL) {
     throw new Error("DATABASE_URL ist nicht gesetzt. Siehe .env.example.");
   }
-
   const ssl =
     env.DATABASE_SSL === "require"
       ? "require"

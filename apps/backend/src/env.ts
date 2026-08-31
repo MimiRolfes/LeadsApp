@@ -57,6 +57,14 @@ const EnvSchema = z.object({
   ADMIN_EMAILS: z.string().optional(),
 
   // --- Datenbank ---
+  /**
+   * `postgres` (Default) = echte Verbindung über `DATABASE_URL`.
+   * `pglite` = eingebettete Datei-Datenbank für lokale Entwicklung ohne
+   * Docker/Postgres (dieselben Migrationen). In Produktion NICHT erlaubt.
+   */
+  DB_DRIVER: z.enum(["postgres", "pglite"]).default("postgres"),
+  /** Ablageort der PGlite-Datei (nur bei DB_DRIVER=pglite). */
+  PGLITE_DIR: z.string().default("./.data/pglite"),
   DATABASE_URL: requiredInProd(z.string().url()),
   DATABASE_SSL: z.enum(["disable", "require", "no-verify"]).default("disable"),
   DATABASE_POOL_MAX: z.coerce.number().int().positive().max(100).default(10),
@@ -136,6 +144,12 @@ function parseOrThrow<S extends z.ZodTypeAny>(
 }
 
 export const env: Env = parseOrThrow(EnvSchema, process.env);
+
+if (env.DB_DRIVER === "pglite" && env.NODE_ENV === "production") {
+  throw new Error(
+    "DB_DRIVER=pglite ist in Produktion nicht erlaubt. Nutze eine echte PostgreSQL-Verbindung (DATABASE_URL).",
+  );
+}
 
 function splitList(value: string | undefined): string[] {
   return (value ?? "")

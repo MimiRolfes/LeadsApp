@@ -1,7 +1,17 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import { env } from "../env";
+import type { Db } from "./types";
 import * as schema from "./schema";
+
+/**
+ * Wird von `initDevDb()` (src/db/dev.ts) gesetzt, wenn `DB_DRIVER=pglite`.
+ * So bleibt PGlite ein reiner dynamischer Import (nicht im Prod-Bundle-Pfad).
+ */
+let devDb: Db | undefined;
+export function __setDevDb(db: Db): void {
+  devDb = db;
+}
 
 /**
  * Postgres-Verbindung + Drizzle-Query-Client.
@@ -43,9 +53,17 @@ function createDb() {
   return drizzle(client, { schema });
 }
 
-let cached: Database | undefined;
+let cached: Db | undefined;
 
-export function getDb(): Database {
+export function getDb(): Db {
+  if (env.DB_DRIVER === "pglite") {
+    if (!devDb) {
+      throw new Error(
+        "PGlite-DB nicht initialisiert — initDevDb() muss vor dem ersten Request laufen.",
+      );
+    }
+    return devDb;
+  }
   if (!cached) {
     cached = createDb();
   }

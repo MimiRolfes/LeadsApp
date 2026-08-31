@@ -19,8 +19,15 @@ await build({
   format: "esm",
   target: "node22",
   sourcemap: true,
-  // postgres.js optionale native Bindung ist nicht nötig
-  external: ["pg-native", "cloudflare:sockets"],
+  // postgres.js optionale native Bindung ist nicht nötig; PGlite ist nur ein
+  // Dev-Only-Treiber (dynamischer Import, nie in Produktion geladen).
+  external: [
+    "pg-native",
+    "cloudflare:sockets",
+    "@electric-sql/pglite",
+    "drizzle-orm/pglite",
+    "drizzle-orm/pglite/migrator",
+  ],
   banner: {
     js: "import { createRequire as __cr } from 'module'; const require = __cr(import.meta.url);",
   },
