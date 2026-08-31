@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   CONSENT_STATUSES,
@@ -102,19 +101,11 @@ export function LeadDetail({
         title={leadName(lead)}
         subtitle={eventName}
         action={
-          <Row>
-            <Link
-              href={`/events/${lead.eventId}/leads`}
-              className={styles.back}
-            >
-              ← Liste
-            </Link>
-            {!editing ? (
-              <Button variant="secondary" onClick={() => setEditing(true)}>
-                Bearbeiten
-              </Button>
-            ) : null}
-          </Row>
+          !editing ? (
+            <Button variant="secondary" onClick={() => setEditing(true)}>
+              Bearbeiten
+            </Button>
+          ) : null
         }
       />
 

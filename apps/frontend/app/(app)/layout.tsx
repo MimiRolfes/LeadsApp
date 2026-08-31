@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireSession } from "@/lib/session";
 import { LogoutButton } from "@/components/logout-button";
 import { SyncStatus } from "@/components/sync-status";
+import { HeaderBack } from "@/components/header-back";
 import styles from "./app-shell.module.css";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
@@ -14,9 +15,12 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         Zum Inhalt springen
       </a>
       <header className={styles.topbar}>
-        <Link href="/" className={styles.logo}>
-          humatter <span>Leads</span>
-        </Link>
+        <div className={styles.brandArea}>
+          <HeaderBack />
+          <Link href="/" className={styles.logo}>
+            humatter <span>Leads</span>
+          </Link>
+        </div>
         <div className={styles.userArea}>
           <SyncStatus />
           <span className={styles.userName}>{user.displayName}</span>

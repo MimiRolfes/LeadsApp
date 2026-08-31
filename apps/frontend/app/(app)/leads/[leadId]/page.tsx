@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import { ApiError, serverApi } from "@/lib/server-api";
 import type { EventDto, LeadDetailDto, QuestionDto } from "@/lib/types";
 import { LeadDetail } from "@/components/lead-detail";
+import { EventNav } from "@/components/event-nav";
+import { Crumb } from "@/components/crumb";
 
 export const dynamic = "force-dynamic";
 
@@ -30,11 +32,19 @@ export default async function LeadDetailPage({
   const isManager = event.myRole === "manager" || event.myRole === "admin";
 
   return (
-    <LeadDetail
-      initial={detail}
-      questions={questionsRes.questions}
-      eventName={event.name}
-      isManager={isManager}
-    />
+    <div>
+      <Crumb
+        href={`/events/${event.id}/leads`}
+        label="Lead-Liste"
+        context={event.name}
+      />
+      <EventNav eventId={event.id} isManager={isManager} />
+      <LeadDetail
+        initial={detail}
+        questions={questionsRes.questions}
+        eventName={event.name}
+        isManager={isManager}
+      />
+    </div>
   );
 }

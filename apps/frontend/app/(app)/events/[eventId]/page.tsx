@@ -27,7 +27,6 @@ export default async function EventOverviewPage({
     throw err;
   }
 
-  const isManager = event.myRole === "manager" || event.myRole === "admin";
   const maxDay = Math.max(1, ...stats.byDay.map((d) => d.count));
 
   return (
@@ -83,25 +82,26 @@ export default async function EventOverviewPage({
         </section>
       ) : null}
 
-      <nav className={styles.links}>
-        <Link href={`/events/${eventId}/leads`}>Lead-Liste</Link>
-        <Link href={`/events/${eventId}/followups`}>
-          Follow-ups
-          {stats.followups.overdue > 0 ? (
-            <span className={styles.pill}>{stats.followups.overdue}</span>
-          ) : null}
+      <div className={styles.quick}>
+        <Link href={`/events/${eventId}/leads`} className={styles.quickCard}>
+          <span className={styles.quickTitle}>Lead-Liste</span>
+          <span className={styles.quickMeta}>
+            {stats.leads.total} Leads · {stats.leads.qualified} qualifiziert
+          </span>
         </Link>
-        {isManager ? (
-          <>
-            <Link href={`/events/${eventId}/team`}>
-              Team ({stats.teamSize})
-            </Link>
-            <Link href={`/events/${eventId}/questions`}>Fragenkatalog</Link>
-            <Link href={`/events/${eventId}/export`}>Export</Link>
-            <Link href={`/events/${eventId}/settings`}>Einstellungen</Link>
-          </>
-        ) : null}
-      </nav>
+        <Link
+          href={`/events/${eventId}/followups`}
+          className={styles.quickCard}
+        >
+          <span className={styles.quickTitle}>
+            Follow-ups
+            {stats.followups.overdue > 0 ? (
+              <span className={styles.pill}>{stats.followups.overdue}</span>
+            ) : null}
+          </span>
+          <span className={styles.quickMeta}>{stats.followups.open} offen</span>
+        </Link>
+      </div>
     </>
   );
 }

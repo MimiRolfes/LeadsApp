@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError, apiDelete, apiGet } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { Alert, Button, Card } from "./ui";
+import { downscaleToJpeg } from "@/lib/image";
+import { Alert, Button, Card, Row } from "./ui";
 import styles from "./lead-detail.module.css";
 
 interface AttachmentDto {
@@ -20,6 +21,7 @@ export function AttachmentPanel({ leadId }: { leadId: string }) {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     try {
@@ -64,7 +66,13 @@ export function AttachmentPanel({ leadId }: { leadId: string }) {
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
     }
+  }
+
+  async function uploadPhoto(file: File) {
+    const jpeg = await downscaleToJpeg(file).catch(() => file);
+    await upload(jpeg);
   }
 
   return (
@@ -113,14 +121,35 @@ export function AttachmentPanel({ leadId }: { leadId: string }) {
           if (f) void upload(f);
         }}
       />
-      <Button
-        type="button"
-        variant="secondary"
-        disabled={busy}
-        onClick={() => fileRef.current?.click()}
-      >
-        {busy ? "Lädt…" : "Datei hochladen"}
-      </Button>
+      <input
+        ref={cameraRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className={styles.fileInput}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void uploadPhoto(f);
+        }}
+      />
+      <Row>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={busy}
+          onClick={() => cameraRef.current?.click()}
+        >
+          {busy ? "Lädt…" : "Visitenkarte / Foto aufnehmen"}
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+        >
+          Datei hochladen
+        </Button>
+      </Row>
     </Card>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { use, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { use, useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import {
   CONSENT_STATUSES,
   LEAD_PRIORITIES,
@@ -10,11 +10,14 @@ import {
 } from "@humatter-leads/shared";
 import { ApiError, apiGet, apiPost } from "@/lib/api";
 import { enqueue } from "@/lib/outbox";
+import { CONTACT_FIELD_LABEL, parseScannedContact } from "@/lib/contact-parse";
+import { downscaleToJpeg } from "@/lib/image";
 import type { LeadDto, QuestionDto } from "@/lib/types";
 import {
   Alert,
   Button,
   Card,
+  LinkButton,
   PageHeader,
   Row,
   SelectField,
@@ -22,6 +25,12 @@ import {
   TextField,
 } from "@/components/ui";
 import styles from "./capture.module.css";
+
+// Kamera + QR-Decoder (jsQR) erst laden, wenn der Scanner wirklich geöffnet wird.
+const QrScanner = dynamic(
+  () => import("@/components/qr-scanner").then((m) => m.QrScanner),
+  { ssr: false },
+);
 
 type Contact = {
   firstName: string;
@@ -61,6 +70,14 @@ const CONSENT_LABEL: Record<string, string> = {
   denied: "abgelehnt",
 };
 
+function hasStructuredField(
+  p: ReturnType<typeof parseScannedContact>,
+): boolean {
+  return Boolean(
+    p.firstName || p.lastName || p.company || p.position || p.email || p.phone,
+  );
+}
+
 export default function CapturePage({
   params,
 }: {
@@ -83,15 +100,102 @@ export default function CapturePage({
   const [saved, setSaved] = useState<LeadDto | null>(null);
   const [queued, setQueued] = useState(false);
 
+  const [scanOpen, setScanOpen] = useState(false);
+  const [scanInfo, setScanInfo] = useState<string | null>(null);
+  const [cardFile, setCardFile] = useState<File | null>(null);
+  const [cardPreview, setCardPreview] = useState<string | null>(null);
+  const [cardUpload, setCardUpload] = useState<
+    "idle" | "working" | "done" | "error"
+  >("idle");
+  const cardInputRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     apiGet<{ questions: QuestionDto[] }>(`/events/${eventId}/questions`)
       .then((r) => setQuestions(r.questions))
       .catch(() => setQuestions([]));
   }, [eventId]);
 
+  useEffect(() => {
+    return () => {
+      if (cardPreview) URL.revokeObjectURL(cardPreview);
+    };
+  }, [cardPreview]);
+
   function set<K extends keyof Contact>(k: K, v: string) {
     setContact((c) => ({ ...c, [k]: v }));
   }
+
+  const applyScan = useCallback(
+    (raw: string) => {
+      setScanOpen(false);
+      const parsed = parseScannedContact(raw);
+      const applied: string[] = [];
+      const patch: Partial<Contact> = {};
+
+      for (const key of Object.keys(EMPTY) as (keyof Contact)[]) {
+        const value = parsed[key as keyof typeof parsed];
+        if (typeof value === "string" && value && !contact[key].trim()) {
+          patch[key] = value;
+          applied.push(CONTACT_FIELD_LABEL[key] ?? key);
+        }
+      }
+      if (applied.length) setContact((c) => ({ ...c, ...patch }));
+
+      const extra = [
+        parsed.link ? `Badge-Link: ${parsed.link}` : null,
+        parsed.note && !hasStructuredField(parsed)
+          ? `Aus QR-Scan: ${parsed.note}`
+          : null,
+      ].filter((v): v is string => Boolean(v));
+      if (extra.length) {
+        setNote((n) => [n, ...extra].filter(Boolean).join("\n"));
+        applied.push("Notiz");
+      }
+
+      setScanInfo(
+        applied.length
+          ? `Aus QR-Code übernommen: ${applied.join(", ")}.`
+          : "QR-Code gelesen, aber keine neuen Felder erkannt. Inhalt: " +
+              raw.slice(0, 120),
+      );
+    },
+    [contact],
+  );
+
+  async function pickCard(file: File) {
+    setCardUpload("idle");
+    const jpeg = await downscaleToJpeg(file).catch(() => file);
+    setCardFile(jpeg);
+    setCardPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(jpeg);
+    });
+  }
+
+  const uploadCard = useCallback(
+    async (leadId: string) => {
+      if (!cardFile) return;
+      setCardUpload("working");
+      try {
+        const fd = new FormData();
+        fd.append("file", cardFile);
+        const res = await fetch(`/api/leads/${leadId}/attachments`, {
+          method: "POST",
+          body: fd,
+        });
+        setCardUpload(res.ok ? "done" : "error");
+      } catch {
+        setCardUpload("error");
+      }
+    },
+    [cardFile],
+  );
+
+  useEffect(() => {
+    if (saved?.id && cardFile && cardUpload === "idle") {
+      void uploadCard(saved.id);
+    }
+  }, [saved, cardFile, cardUpload, uploadCard]);
 
   function resetForm() {
     setContact(EMPTY);
@@ -105,6 +209,13 @@ export default function CapturePage({
     setError(null);
     setSaved(null);
     setQueued(false);
+    setScanInfo(null);
+    setCardFile(null);
+    setCardUpload("idle");
+    setCardPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return null;
+    });
     clientLocalId.current = crypto.randomUUID();
   }
 
@@ -162,14 +273,17 @@ export default function CapturePage({
             Der Lead liegt lokal in der Warteschlange und wird synchronisiert,
             sobald wieder eine Verbindung besteht.
           </Alert>
+          {cardFile ? (
+            <Alert kind="error">
+              Die fotografierte Visitenkarte kann offline nicht hochgeladen
+              werden. Bitte am Lead ergänzen, sobald wieder Verbindung besteht.
+            </Alert>
+          ) : null}
           <Row>
             <Button onClick={resetForm}>Nächsten Lead erfassen</Button>
-            <Link
-              href={`/events/${eventId}/leads`}
-              className={styles.secondaryLink}
-            >
+            <LinkButton variant="secondary" href={`/events/${eventId}/leads`}>
               Zur Lead-Liste
-            </Link>
+            </LinkButton>
           </Row>
         </Card>
       </>
@@ -187,14 +301,31 @@ export default function CapturePage({
               "Lead"}{" "}
             wurde erfasst.
           </Alert>
+          {cardFile ? (
+            <Alert
+              kind={
+                cardUpload === "done"
+                  ? "success"
+                  : cardUpload === "error"
+                    ? "error"
+                    : "info"
+              }
+            >
+              {cardUpload === "done"
+                ? "Visitenkarte als Anhang gespeichert."
+                : cardUpload === "error"
+                  ? "Visitenkarte konnte nicht hochgeladen werden — am Lead erneut versuchen."
+                  : "Visitenkarte wird hochgeladen…"}
+            </Alert>
+          ) : null}
           <Row>
             <Button onClick={resetForm}>Nächsten Lead erfassen</Button>
-            <Link
-              href={`/events/${eventId}/leads`}
-              className={styles.secondaryLink}
-            >
+            <LinkButton variant="secondary" href={`/leads/${saved.id}`}>
+              Lead öffnen
+            </LinkButton>
+            <LinkButton variant="secondary" href={`/events/${eventId}/leads`}>
               Zur Lead-Liste
-            </Link>
+            </LinkButton>
           </Row>
         </Card>
       </>
@@ -203,10 +334,85 @@ export default function CapturePage({
 
   return (
     <>
+      {scanOpen ? (
+        <QrScanner onResult={applyScan} onClose={() => setScanOpen(false)} />
+      ) : null}
+
       <PageHeader
         title="Lead erfassen"
         subtitle="Wenig tippen — Pflichtfelder gibt es keine."
       />
+
+      <div className={styles.quickCapture}>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => {
+            setScanInfo(null);
+            setScanOpen(true);
+          }}
+        >
+          QR-Code scannen
+        </Button>
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => cardInputRef.current?.click()}
+        >
+          Visitenkarte fotografieren
+        </Button>
+        <input
+          ref={cardInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className={styles.hiddenInput}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) void pickCard(f);
+            e.target.value = "";
+          }}
+        />
+      </div>
+
+      {scanInfo ? (
+        <Alert kind="success">
+          {scanInfo}{" "}
+          <button
+            type="button"
+            className={styles.inlineBtn}
+            onClick={() => setScanInfo(null)}
+          >
+            ausblenden
+          </button>
+        </Alert>
+      ) : null}
+
+      {cardPreview ? (
+        <div className={styles.cardPreview}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={cardPreview} alt="Fotografierte Visitenkarte" />
+          <div>
+            <span>
+              Visitenkarte angehängt — wird nach dem Speichern hochgeladen.
+            </span>
+            <button
+              type="button"
+              className={styles.inlineBtn}
+              onClick={() => {
+                setCardFile(null);
+                setCardUpload("idle");
+                setCardPreview((prev) => {
+                  if (prev) URL.revokeObjectURL(prev);
+                  return null;
+                });
+              }}
+            >
+              entfernen
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {error ? <Alert kind="error">{error}</Alert> : null}
       {duplicates ? (
