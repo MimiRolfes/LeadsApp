@@ -2,10 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  PASSWORD_MIN_LENGTH,
-  RegisterInputSchema,
-} from "@humatter-leads/shared";
+import { PASSWORD_HINT, RegisterInputSchema } from "@humatter-leads/shared";
 import { ApiError, apiPost } from "@/lib/api";
 import { Alert, Button, TextField } from "@/components/ui";
 import styles from "../auth.module.css";
@@ -78,7 +75,7 @@ export default function RegisterPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={fieldErrors.password?.[0]}
-        hint={`Mindestens ${PASSWORD_MIN_LENGTH} Zeichen`}
+        hint={PASSWORD_HINT}
       />
       <Button type="submit" block disabled={busy}>
         {busy ? "…" : "Konto anlegen"}

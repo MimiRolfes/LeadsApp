@@ -4,6 +4,18 @@
   flex-direction: column;
   background: var(--color-bg);
 }
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 100;
+  padding: var(--space-2) var(--space-4);
+  background: var(--color-accent);
+  color: var(--color-text-on-accent);
+}
+.skip:focus {
+  left: 0;
+}
 .topbar {
   position: sticky;
   top: 0;

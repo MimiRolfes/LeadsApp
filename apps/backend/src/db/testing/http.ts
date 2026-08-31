@@ -4,7 +4,7 @@ import type { TestDb } from "./pglite";
 /**
  * Test-Helfer für HTTP-Flows gegen die Hono-App (mit PGlite).
  */
-const PW = "correct-horse-battery-staple";
+const PW = "horse-staple-7";
 export const uuid = () => crypto.randomUUID();
 
 export function makeClient(db: TestDb) {

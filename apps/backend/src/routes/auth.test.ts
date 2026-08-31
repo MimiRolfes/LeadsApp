@@ -32,7 +32,7 @@ function cookieFrom(res: Response): string {
   return raw.split(";")[0]!;
 }
 
-const strongPassword = "correct-horse-battery-staple";
+const strongPassword = "horse-staple-7";
 
 describe("POST /api/auth/register", () => {
   it("creates an account for an allowed email domain and sets a session cookie", async () => {

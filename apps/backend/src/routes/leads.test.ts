@@ -15,7 +15,7 @@ afterAll(async () => {
 });
 beforeEach(() => __resetRateLimit());
 
-const PW = "correct-horse-battery-staple";
+const PW = "horse-staple-7";
 
 async function login(email: string): Promise<string> {
   await app.request("/api/auth/register", {

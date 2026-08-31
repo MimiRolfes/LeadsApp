@@ -9,8 +9,9 @@ import { GLOBAL_ROLES } from "./constants";
  * Konvention: `*Schema` = Zod-Objekt, gleichnamiger Typ ohne Suffix.
  */
 
-export const PASSWORD_MIN_LENGTH = 12;
+export const PASSWORD_MIN_LENGTH = 6;
 export const PASSWORD_MAX_LENGTH = 128;
+export const PASSWORD_HINT = `Mindestens ${PASSWORD_MIN_LENGTH} Zeichen und mindestens eine Ziffer.`;
 
 /** E-Mail wird immer klein geschrieben und getrimmt. */
 export const emailField = z
@@ -26,7 +27,8 @@ export const passwordField = z
     PASSWORD_MIN_LENGTH,
     `Das Passwort muss mindestens ${PASSWORD_MIN_LENGTH} Zeichen haben.`,
   )
-  .max(PASSWORD_MAX_LENGTH);
+  .max(PASSWORD_MAX_LENGTH)
+  .regex(/\d/, "Das Passwort muss mindestens eine Ziffer enthalten.");
 
 export const RegisterInputSchema = z.object({
   email: emailField,

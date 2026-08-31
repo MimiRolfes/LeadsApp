@@ -72,6 +72,17 @@ export interface EventMemberDto {
   eventRole: "manager" | "member" | "readonly";
 }
 
+export interface FollowupDto {
+  id: string;
+  leadId: string;
+  assigneeId: string | null;
+  dueOn: string | null;
+  status: "open" | "done" | "cancelled";
+  note: string | null;
+  completedAt: string | null;
+  createdAt: string;
+}
+
 export interface EventStatsDto {
   leads: {
     total: number;

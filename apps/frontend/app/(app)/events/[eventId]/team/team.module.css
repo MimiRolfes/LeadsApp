@@ -1,0 +1,44 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.list li + li {
+  border-top: 1px solid var(--color-border);
+}
+.name {
+  display: block;
+  font-weight: 600;
+}
+.email {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.role {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.remove {
+  border: 0;
+  background: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: var(--text-base);
+}
+.h2 {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}

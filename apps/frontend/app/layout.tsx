@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Inria_Serif } from "next/font/google";
 import { APP_NAME } from "@humatter-leads/shared";
+import { ServiceWorkerRegister } from "@/components/service-worker";
 import "./globals.css";
 
 const inter = Inter({
@@ -25,6 +26,11 @@ export const metadata: Metadata = {
     "Interne, mobile-first Lead-Capture- und Lead-Management-App für Messeauftritte von humatter.",
   applicationName: APP_NAME,
   robots: { index: false, follow: false },
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon.svg",
+  },
+  appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black" },
 };
 
 export const viewport: Viewport = {
@@ -39,7 +45,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="de" className={`${inter.variable} ${inriaSerif.variable}`}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }

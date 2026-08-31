@@ -87,6 +87,21 @@ const config = [
     files: ["**/*.test.ts", "**/*.test.tsx"],
     rules: { "no-console": "off" },
   },
+  // Service Worker (Browser-Worker-Kontext)
+  {
+    files: ["**/public/sw.js"],
+    languageOptions: {
+      globals: {
+        self: "readonly",
+        caches: "readonly",
+        fetch: "readonly",
+        Response: "readonly",
+        URL: "readonly",
+        Promise: "readonly",
+      },
+    },
+    rules: { "no-undef": "off" },
+  },
 ];
 
 export default config;

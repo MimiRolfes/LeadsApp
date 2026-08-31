@@ -9,6 +9,7 @@ import {
   type LeadPriority,
 } from "@humatter-leads/shared";
 import { ApiError, apiGet, apiPost } from "@/lib/api";
+import { enqueue } from "@/lib/outbox";
 import type { LeadDto, QuestionDto } from "@/lib/types";
 import {
   Alert,
@@ -80,6 +81,7 @@ export default function CapturePage({
   const [error, setError] = useState<string | null>(null);
   const [duplicates, setDuplicates] = useState<LeadDto[] | null>(null);
   const [saved, setSaved] = useState<LeadDto | null>(null);
+  const [queued, setQueued] = useState(false);
 
   useEffect(() => {
     apiGet<{ questions: QuestionDto[] }>(`/events/${eventId}/questions`)
@@ -102,6 +104,7 @@ export default function CapturePage({
     setDuplicates(null);
     setError(null);
     setSaved(null);
+    setQueued(false);
     clientLocalId.current = crypto.randomUUID();
   }
 
@@ -132,19 +135,45 @@ export default function CapturePage({
       setSaved(lead);
     } catch (err) {
       if (err instanceof ApiError && err.code === "duplicate_found") {
-        const body = err as ApiError & { fields?: never };
-        // Kandidaten stehen im rohen Body – erneut lesen ist nicht möglich,
-        // daher zeigen wir einen generischen Hinweis + Force-Option.
         setDuplicates([]);
-        void body;
+      } else if (err instanceof ApiError) {
+        setError(err.message);
       } else {
-        setError(
-          err instanceof ApiError ? err.message : "Speichern fehlgeschlagen.",
-        );
+        // Kein Server erreicht (offline / Netzfehler) → Warteschlange.
+        await enqueue({
+          localId: clientLocalId.current,
+          kind: "lead.create",
+          eventId,
+          payload,
+        });
+        setQueued(true);
       }
     } finally {
       setBusy(false);
     }
+  }
+
+  if (queued) {
+    return (
+      <>
+        <PageHeader title="Offline gespeichert" />
+        <Card>
+          <Alert kind="success">
+            Der Lead liegt lokal in der Warteschlange und wird synchronisiert,
+            sobald wieder eine Verbindung besteht.
+          </Alert>
+          <Row>
+            <Button onClick={resetForm}>Nächsten Lead erfassen</Button>
+            <Link
+              href={`/events/${eventId}/leads`}
+              className={styles.secondaryLink}
+            >
+              Zur Lead-Liste
+            </Link>
+          </Row>
+        </Card>
+      </>
+    );
   }
 
   if (saved) {

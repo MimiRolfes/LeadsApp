@@ -28,6 +28,7 @@ export default async function EventOverviewPage({
   }
 
   const isManager = event.myRole === "manager" || event.myRole === "admin";
+  const maxDay = Math.max(1, ...stats.byDay.map((d) => d.count));
 
   return (
     <>
@@ -45,18 +46,59 @@ export default async function EventOverviewPage({
         <Kpi label="Leads" value={stats.leads.total} />
         <Kpi label="Hot" value={stats.leads.hot} tone="hot" />
         <Kpi label="Qualifiziert" value={stats.leads.qualified} />
+        <Kpi label="mit Einwilligung" value={stats.leads.withConsent} />
         <Kpi label="Follow-ups offen" value={stats.followups.open} />
         <Kpi label="überfällig" value={stats.followups.overdue} tone="warn" />
-        <Kpi label="Team" value={stats.teamSize} />
       </ul>
+
+      {stats.byDay.length > 1 ? (
+        <section className={styles.panel}>
+          <h2 className={styles.panelTitle}>Leads pro Tag</h2>
+          <div className={styles.chart} role="img" aria-label="Leads pro Tag">
+            {stats.byDay.map((d) => (
+              <div key={d.day} className={styles.bar}>
+                <div
+                  className={styles.barFill}
+                  style={{ height: `${(d.count / maxDay) * 100}%` }}
+                  title={`${d.day}: ${d.count}`}
+                />
+                <span className={styles.barLabel}>{d.day.slice(5)}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {stats.byOwner.length > 0 ? (
+        <section className={styles.panel}>
+          <h2 className={styles.panelTitle}>Nach Erfasser:in</h2>
+          <ul className={styles.owners}>
+            {stats.byOwner.map((o) => (
+              <li key={o.userId ?? "none"}>
+                <span>{o.displayName ?? "—"}</span>
+                <strong>{o.count}</strong>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       <nav className={styles.links}>
         <Link href={`/events/${eventId}/leads`}>Lead-Liste</Link>
+        <Link href={`/events/${eventId}/followups`}>
+          Follow-ups
+          {stats.followups.overdue > 0 ? (
+            <span className={styles.pill}>{stats.followups.overdue}</span>
+          ) : null}
+        </Link>
         {isManager ? (
           <>
-            <Link href={`/events/${eventId}/team`}>Team</Link>
+            <Link href={`/events/${eventId}/team`}>
+              Team ({stats.teamSize})
+            </Link>
             <Link href={`/events/${eventId}/questions`}>Fragenkatalog</Link>
             <Link href={`/events/${eventId}/export`}>Export</Link>
+            <Link href={`/events/${eventId}/settings`}>Einstellungen</Link>
           </>
         ) : null}
       </nav>

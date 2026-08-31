@@ -1,0 +1,48 @@
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+.list li + li {
+  border-top: 1px solid var(--color-border);
+}
+.list li[data-archived="true"] {
+  opacity: 0.5;
+}
+.prompt {
+  display: block;
+  font-weight: 600;
+}
+.type {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+}
+.archiveBtn {
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--text-sm);
+}
+.archived {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+.h2 {
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}

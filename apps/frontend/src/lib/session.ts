@@ -12,8 +12,13 @@ export async function getSession(): Promise<SessionInfo | null> {
   try {
     return await serverApi<SessionInfo>("/auth/me");
   } catch (err) {
-    if (err instanceof ApiError && err.status === 401) return null;
-    throw err;
+    // 401 = nicht angemeldet. Netzfehler (Backend nicht erreichbar) behandeln
+    // wir best effort ebenfalls als "nicht angemeldet", statt zu crashen.
+    if (err instanceof ApiError) {
+      if (err.status === 401) return null;
+      throw err;
+    }
+    return null;
   }
 }
 

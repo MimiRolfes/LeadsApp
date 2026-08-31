@@ -19,7 +19,7 @@ afterAll(async () => {
 });
 beforeEach(() => __resetRateLimit());
 
-const PW = "correct-horse-battery-staple";
+const PW = "horse-staple-7";
 
 function jpost(path: string, body: unknown, cookie?: string) {
   return client.req(path, cookie ?? "", { method: "POST", json: body });

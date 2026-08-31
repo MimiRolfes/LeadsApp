@@ -3,7 +3,7 @@
 import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { PASSWORD_MIN_LENGTH } from "@humatter-leads/shared";
+import { PASSWORD_HINT } from "@humatter-leads/shared";
 import { ApiError, apiPost } from "@/lib/api";
 import { Alert, Button, TextField } from "@/components/ui";
 import styles from "../auth.module.css";
@@ -66,7 +66,7 @@ function ResetForm() {
         required
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        hint={`Mindestens ${PASSWORD_MIN_LENGTH} Zeichen`}
+        hint={PASSWORD_HINT}
       />
       <Button type="submit" block disabled={busy}>
         {busy ? "…" : "Passwort setzen"}
