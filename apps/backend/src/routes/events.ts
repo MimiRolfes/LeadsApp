@@ -4,16 +4,22 @@ import {
   EventCreateSchema,
   EventMemberAddSchema,
   EventUpdateSchema,
+  LeadCreateSchema,
+  LeadListQuerySchema,
   QuestionCreateSchema,
   QuestionUpdateSchema,
 } from "@humatter-leads/shared";
 import type { AppEnv } from "../types";
 import { requireAuthz } from "../auth/middleware";
 import {
+  assertCanCaptureLead,
   assertCanManageEvent,
   assertCanManageQuestions,
   assertCanViewEvent,
+  isEventManager,
 } from "../authz";
+import { createLead, listLeads } from "../domain/leads";
+import { clientIp } from "../lib/rate-limit";
 import {
   addMember,
   archiveQuestion,
@@ -191,3 +197,54 @@ eventsRoutes.post("/:eventId/questions/:questionId/archive", async (c) => {
   );
   return c.body(null, 204);
 });
+
+// --- Leads (event-gescopt) --------------------------------------
+
+eventsRoutes.get(
+  "/:eventId/leads",
+  zValidator("query", LeadListQuerySchema, onInvalid),
+  async (c) => {
+    const event = await loadVisibleEvent(c);
+    const ctx = c.get("authz")!;
+    const q = c.req.valid("query");
+    // Nicht-Manager sehen nur eigene Leads (PROJECT.md).
+    const scope = isEventManager(ctx, event.id) ? (q.scope ?? "all") : "mine";
+    const result = await listLeads(c.get("db"), {
+      eventId: event.id,
+      scope,
+      userId: ctx.userId,
+      priority: q.priority,
+      ownerId: q.ownerId,
+      q: q.q,
+      tag: q.tag,
+      limit: q.limit,
+      offset: q.offset,
+    });
+    return c.json({ leads: result.items, total: result.total });
+  },
+);
+
+eventsRoutes.post(
+  "/:eventId/leads",
+  zValidator("json", LeadCreateSchema, onInvalid),
+  async (c) => {
+    const eventId = paramOr404(c, "eventId");
+    assertCanCaptureLead(c.get("authz")!, eventId);
+    const result = await createLead(c.get("db"), {
+      actorId: c.get("user")!.id,
+      eventId,
+      input: c.req.valid("json"),
+      ip: clientIp(c),
+    });
+    if (result.status === "duplicate") {
+      return c.json(
+        { error: { code: "duplicate_found" }, candidates: result.candidates },
+        409,
+      );
+    }
+    return c.json(
+      { lead: result.lead },
+      result.status === "created" ? 201 : 200,
+    );
+  },
+);

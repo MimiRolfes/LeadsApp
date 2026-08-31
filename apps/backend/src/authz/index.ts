@@ -82,6 +82,21 @@ export function assertCanCaptureLead(ctx: AuthCtx, eventId: string): void {
   if (!canCaptureLead(ctx, eventId)) deny("lead_capture_denied");
 }
 
+/**
+ * Lead ansehen: Event-Manager/Admin sehen alle; ein `member` nur eigene
+ * (Owner) — PROJECT.md „eigene/zugewiesene Leads".
+ */
+export function assertCanViewLead(
+  ctx: AuthCtx,
+  eventId: string,
+  ownerId: string | null,
+): void {
+  if (isEventManager(ctx, eventId)) return;
+  if (ctx.eventRole(eventId) === "member" && ownerId === ctx.userId) return;
+  if (ctx.eventRole(eventId) === "readonly") return;
+  deny("lead_access_denied");
+}
+
 export function assertCanEditLead(
   ctx: AuthCtx,
   eventId: string,
