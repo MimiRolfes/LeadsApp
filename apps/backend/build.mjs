@@ -6,6 +6,25 @@ import { cp, rm, mkdir } from "node:fs/promises";
 await rm("dist", { recursive: true, force: true });
 await mkdir("dist", { recursive: true });
 
+/**
+ * `src/db/dev.ts` ist der PGlite-Dev-Treiber. Er wird nur dynamisch importiert
+ * (server.ts / seed.ts) und darf NICHT ins Bundle wandern — sonst hebt esbuild
+ * seine `@electric-sql/pglite`-Imports an den Modulkopf von `dist/server.js`,
+ * und das Runtime-Image (ohne node_modules) stürzt beim Start ab.
+ * Der Import bleibt so ein lazy Runtime-`import("./dev")`, der in Produktion
+ * (DB_DRIVER=postgres) nie ausgeführt wird.
+ */
+const externalizeDevDb = {
+  name: "externalize-dev-db",
+  setup(b) {
+    b.onResolve({ filter: /(^|\/)(db\/)?dev$/ }, (args) =>
+      args.kind === "dynamic-import"
+        ? { path: args.path, external: true }
+        : null,
+    );
+  },
+};
+
 await build({
   entryPoints: {
     server: "src/server.ts",
@@ -19,15 +38,9 @@ await build({
   format: "esm",
   target: "node22",
   sourcemap: true,
-  // postgres.js optionale native Bindung ist nicht nötig; PGlite ist nur ein
-  // Dev-Only-Treiber (dynamischer Import, nie in Produktion geladen).
-  external: [
-    "pg-native",
-    "cloudflare:sockets",
-    "@electric-sql/pglite",
-    "drizzle-orm/pglite",
-    "drizzle-orm/pglite/migrator",
-  ],
+  // postgres.js optionale native Bindung ist nicht nötig.
+  external: ["pg-native", "cloudflare:sockets"],
+  plugins: [externalizeDevDb],
   banner: {
     js: "import { createRequire as __cr } from 'module'; const require = __cr(import.meta.url);",
   },
