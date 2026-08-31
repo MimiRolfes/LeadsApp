@@ -18,17 +18,22 @@ cd LeadsApp
 
 ## Status
 
-**Phase 1 — Datenbank & Container-Setup.** Auth, API-Endpunkte und der
-Erfassungs-Flow folgen. Fahrplan: `docs/plan.md` (lokal).
+**Phase 3 abgeschlossen — Frontend steht.** Backend (Auth, AuthZ, Leads, Sync,
+Export, DSGVO) und die mobile PWA inkl. Erfassungs-Flow, Dashboard, QR-Badge-
+Scanner und Visitenkarten-Kamera sind umgesetzt. Als Nächstes: Security-Review
+(Phase 4) und QA/Release (Phase 5). Fahrplan: `docs/plan.md` (lokal).
 
 | Phase | Inhalt | Status |
 | --- | --- | --- |
 | 0 | Monorepo-Gerüst, Toolchain, CI | ✅ |
-| 1 | DB-Schema, Migrationen, Docker-Setup, Retention-Konzept | ✅ (Schema + Infra) |
-| 2 | Backend: Auth, AuthZ, Leads, Sync, Export | offen |
-| 3 | Frontend: PWA, Capture-Flow, Dashboard | offen |
+| 1 | DB-Schema, Migrationen, Docker-Setup, Retention-Konzept | ✅ |
+| 2 | Backend: Auth, AuthZ, Leads, Sync, Export, DSGVO-Rechte | ✅ |
+| 3 | Frontend: PWA, Capture-Flow, Dashboard, QR-/Kamera-Scan | ✅ |
 | 4 | Security-Review | offen |
 | 5 | QA + Release (inkl. Container-/Persistenz-Tests) | offen |
+
+> Noch offen vor Go-Live: Security-Review, QA/E2E, SMTP-Anbindung für
+> Passwort-Reset (aktuell `log`-Treiber), EU/EWR-Region verifizieren, XLSX-Export.
 
 ## Architektur
 
@@ -112,11 +117,22 @@ Details (lokal, nicht im Repo): `docs/HETZNER_DEPLOYMENT.md` (Handover, 17 Punkt
 
 Keine zentrale Benutzerverwaltung: Mitarbeitende legen ihr Konto selbst an.
 
-- `POST /api/auth/register` — E-Mail (**nur `@mindsewn.de`**) + Passwort (min. 12 Zeichen)
+- `POST /api/auth/register` — E-Mail (**nur `@mindsewn.de`**) + Passwort (min. 6 Zeichen, mind. eine Ziffer)
 - `POST /api/auth/login` · `POST /api/auth/logout` · `POST /api/auth/logout-all` · `GET /api/auth/me`
 
 Konfigurierbar über `ALLOWED_EMAIL_DOMAINS` (Default `mindsewn.de`) und
 `ADMIN_EMAILS`. Session als HttpOnly-Cookie.
+
+## Lead-Erfassung am Stand
+
+- **QR-Code scannen** — Aussteller-/Besucher-Badges: vCard, MECARD, `mailto:`,
+  Veranstalter-Lead-Links und Klartext werden erkannt; nur leere Felder werden
+  vorbefüllt. Native `BarcodeDetector` wo verfügbar, sonst `jsQR`.
+- **Visitenkarte fotografieren** — Foto wird im Browser verkleinert (JPEG) und
+  als Anhang an den Lead gehängt.
+- Kamerazugriff erfordert **HTTPS** (oder `localhost`) — im Betrieb also nur
+  hinter TLS. Ohne Netz landet der Lead in der Offline-Warteschlange; das
+  Kartenfoto muss dann nach dem Sync ergänzt werden.
 
 ## Dokumentation
 
