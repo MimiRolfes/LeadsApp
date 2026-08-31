@@ -1,0 +1,166 @@
+/*
+ * humatter Leads — Design Tokens (Brand Foundation)
+ *
+ * Quelle: humatter-Marke aus Figma "Humatter-Insta" (Instagram-Asset-Datei,
+ * fileKey aTefbNYHYn4gfUZoKa7UgW). Es gibt kein App-Design in Figma; die App-UI
+ * wird auf Basis dieser Marken-Tokens gestaltet (Freigabe 2026-08-31).
+ * Vollständige Herleitung: docs/design-system.md
+ *
+ * Rohwerte aus Figma:
+ *   - dunkel-blau  #001540   (Headline-/Textfarbe, Figma-Variable "dunkel-blau")
+ *   - akzent-blau  #0c6cfd   (Links, Betonung, primäre Aktion)
+ *   - lavendel     #c5cdf7   (Marken-Flächen, Hero, Illustrations-Hintergrund)
+ *   - schrift:     Inria Serif (Display) / Inter (UI, Body)
+ */
+
+:root {
+  /* --- Marken-Rohfarben --- */
+  --brand-navy: #001540;
+  --brand-navy-soft: #0b1444;
+  --brand-blue: #0c6cfd;
+  --brand-lavender: #c5cdf7;
+  --brand-lavender-tint: #eef0fb;
+
+  /* --- Neutralskala --- */
+  --neutral-0: #ffffff;
+  --neutral-50: #f6f7fb;
+  --neutral-100: #eceef6;
+  --neutral-200: #d9dced;
+  --neutral-300: #b9bed6;
+  --neutral-500: #6b7194;
+  --neutral-700: #3a3f60;
+  --neutral-900: #10162f;
+
+  /* --- Status --- */
+  --status-success: #1f8a4c;
+  --status-warning: #b26a00;
+  --status-danger: #c02626;
+  --status-info: var(--brand-blue);
+
+  /* --- Semantische Rollen (Light) --- */
+  --color-bg: var(--neutral-50);
+  --color-surface: var(--neutral-0);
+  --color-surface-raised: var(--neutral-0);
+  --color-border: var(--neutral-200);
+  --color-text: var(--neutral-900);
+  --color-text-muted: var(--neutral-500);
+  --color-text-on-accent: var(--neutral-0);
+  --color-accent: var(--brand-blue);
+  --color-accent-hover: #0a58d0;
+  --color-focus-ring: #0c6cfd;
+  --color-heading: var(--brand-navy);
+
+  /* --- Typografie --- */
+  --font-ui:
+    var(--font-inter), system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-inria-serif), Georgia, "Times New Roman", serif;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+  --leading-tight: 1.2;
+  --leading-normal: 1.5;
+
+  /* --- Spacing (4px-Basis) --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+
+  /* --- Radius --- */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* --- Touch targets (mobile-first, MASTER_PROMPT §3) --- */
+  --touch-min: 44px;
+
+  /* --- Elevation --- */
+  --shadow-sm: 0 1px 2px rgba(16, 22, 47, 0.08);
+  --shadow-md: 0 4px 16px rgba(16, 22, 47, 0.12);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #0b0f24;
+    --color-surface: #141a35;
+    --color-surface-raised: #1b2242;
+    --color-border: #2a3157;
+    --color-text: #eef0fb;
+    --color-text-muted: #a7adce;
+    --color-accent: #5b9bff;
+    --color-accent-hover: #7cb0ff;
+    --color-focus-ring: #7cb0ff;
+    --color-heading: #eef0fb;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0b0f24;
+  --color-surface: #141a35;
+  --color-surface-raised: #1b2242;
+  --color-border: #2a3157;
+  --color-text: #eef0fb;
+  --color-text-muted: #a7adce;
+  --color-accent: #5b9bff;
+  --color-accent-hover: #7cb0ff;
+  --color-focus-ring: #7cb0ff;
+  --color-heading: #eef0fb;
+}
+
+:root[data-theme="light"] {
+  --color-heading: var(--brand-navy);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

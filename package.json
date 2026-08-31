@@ -1,0 +1,47 @@
+{
+  "name": "humatter-leads",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,magenta \"npm:dev:backend\" \"npm:dev:frontend\"",
+    "dev:backend": "npm run dev -w @humatter-leads/backend",
+    "dev:frontend": "npm run dev -w @humatter-leads/frontend",
+    "build": "npm run build -w @humatter-leads/backend && npm run build -w @humatter-leads/frontend",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "db:generate": "npm run db:generate -w @humatter-leads/backend",
+    "db:migrate": "npm run db:migrate -w @humatter-leads/backend",
+    "db:seed": "npm run db:seed -w @humatter-leads/backend",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+  },
+  "overrides": {
+    "postcss": "^8.5.26"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.21.0",
+    "@typescript-eslint/parser": "^8.21.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.2",
+    "eslint": "^9.18.0",
+    "eslint-config-next": "^15.1.6",
+    "eslint-config-prettier": "^10.0.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.4"
+  }
+}

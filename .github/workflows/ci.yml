@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# CLAUDE.md Gate 2: Typecheck/Lint/Tests/Build müssen grün sein.
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
+      - name: Unit + DB tests (PGlite)
+        run: npm run test
+      - name: Production build (backend bundle + frontend standalone)
+        run: npm run build
+
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Dependency vulnerability audit (prod deps, high+)
+        run: npm audit --omit=dev --audit-level=high
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compose.yaml
+        run: |
+          cp .env.example .env
+          docker compose config -q
+      - name: Build backend image
+        run: docker build -f apps/backend/Dockerfile -t humatter-leads-backend .
+      - name: Build frontend image
+        run: docker build -f apps/frontend/Dockerfile -t humatter-leads-frontend .
+      - name: Smoke — backend starts and serves /api/health
+        run: |
+          docker run -d --name be -e NODE_ENV=development -e PORT=8080 \
+            -p 8080:8080 humatter-leads-backend
+          for i in $(seq 1 20); do
+            curl -fsS http://localhost:8080/api/health && break || sleep 1
+          done
+          curl -fsS http://localhost:8080/api/health
+          docker rm -f be
+
+  # Voller Stack-Test (Persistenz nach Container-Neustart) — Phase 5 / QA.
+  # stack:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - docker compose up -d, seed, down, up -d, assert Zeilenzahl unverändert

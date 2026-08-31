@@ -1,0 +1,53 @@
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { env } from "../env";
+import * as schema from "./schema";
+
+/**
+ * Postgres-Verbindung + Drizzle-Query-Client.
+ *
+ * Alle Verbindungsparameter kommen aus der Umgebung (`DATABASE_URL`,
+ * `DATABASE_SSL`). Nichts ist hier fest verdrahtet — dasselbe Modul läuft
+ * lokal (Docker-Compose-Postgres) und später auf dem Hetzner-Server.
+ *
+ * Nur das Backend importiert dieses Modul. Lazy: die Verbindung wird erst
+ * beim ersten Zugriff geöffnet.
+ */
+
+export type Database = ReturnType<typeof createDb>;
+
+function resolveSsl(): postgres.Options<Record<string, never>>["ssl"] {
+  switch (env.DATABASE_SSL) {
+    case "require":
+      return "require";
+    case "no-verify":
+      return { rejectUnauthorized: false };
+    case "disable":
+    default:
+      return false;
+  }
+}
+
+function createDb() {
+  if (!env.DATABASE_URL) {
+    throw new Error(
+      "DATABASE_URL ist nicht gesetzt. Siehe .env.example / docs/HETZNER_DEPLOYMENT.md.",
+    );
+  }
+  const client = postgres(env.DATABASE_URL, {
+    max: env.DATABASE_POOL_MAX,
+    ssl: resolveSsl(),
+    // keine Query-Parameter/Werte ins Log
+    onnotice: () => {},
+  });
+  return drizzle(client, { schema });
+}
+
+let cached: Database | undefined;
+
+export function getDb(): Database {
+  if (!cached) {
+    cached = createDb();
+  }
+  return cached;
+}

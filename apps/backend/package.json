@@ -1,0 +1,32 @@
+{
+  "name": "@humatter-leads/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "node build.mjs",
+    "start": "node dist/server.js",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:generate": "drizzle-kit generate --config=./drizzle.config.ts",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:seed": "tsx src/db/seed.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.0",
+    "@hono/zod-validator": "^0.4.3",
+    "@humatter-leads/shared": "*",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.7.0",
+    "postgres": "^3.4.9",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "@types/node": "^22.10.7",
+    "drizzle-kit": "^0.31.10",
+    "esbuild": "^0.25.0",
+    "tsx": "^4.23.13"
+  }
+}

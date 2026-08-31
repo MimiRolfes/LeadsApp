@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# build output
+**/.next/
+**/dist/
+/out/
+*.tsbuildinfo
+
+# testing
+coverage/
+playwright-report/
+test-results/
+
+# local runtime data (uploads, DB volume mounts, etc.)
+.data/
+
+# env / secrets — NEVER commit real values (CLAUDE.md Regel 5)
+.env
+.env.*
+!.env.example
+
+# local-only compose override (host ports); never deployed
+compose.override.yaml
+
+# misc
+.DS_Store
+*.pem
+*.log
+npm-debug.log*
+.idea
+.vscode/*
+!.vscode/extensions.json

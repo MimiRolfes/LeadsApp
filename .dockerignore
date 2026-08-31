@@ -1,0 +1,23 @@
+# Repo-Wurzel ist der Build-Context für beide Images.
+.git
+.github
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/playwright-report
+**/test-results
+**/*.tsbuildinfo
+.data
+.env
+.env.*
+!.env.example
+**/.DS_Store
+**/npm-debug.log*
+.claude
+.vscode
+.idea
+docs
+DEPLOYMENT_CHECKLIST.md
+*.md
+!README.md

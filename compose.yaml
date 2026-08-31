@@ -1,0 +1,115 @@
+# humatter Leads — vollständiges Docker-Setup.
+#
+#   docker compose up --build
+#
+# startet: db  ->  migrate (einmalig)  ->  backend  ->  frontend
+# Erreichbar ist nur das Frontend auf 127.0.0.1:${FRONTEND_PORT:-3000}.
+#
+# Netzwerktrennung:
+#   backend_net (internal: true) : db, migrate, backend  — kein Internet, kein Host
+#   web_net                      : frontend, backend
+#   -> die Datenbank ist ausschließlich für backend/migrate erreichbar,
+#      nie für das Frontend und nie vom Host/Internet.
+#
+# Werte kommen aus einer lokalen .env (siehe .env.example). Es sind KEINE
+# echten Secrets in dieser Datei. Für lokale Host-Entwicklung zusätzlich
+# `cp compose.override.yaml.example compose.override.yaml`.
+
+name: humatter-leads
+
+services:
+  db:
+    image: postgres:16.6-bookworm
+    restart: unless-stopped
+    # Kein `ports:` — die DB ist nie vom Host/Internet erreichbar.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+    volumes:
+      # Persistenter, benannter Volume — Daten überleben `down` / Rebuild.
+      - db_data:/var/lib/postgresql/data
+    networks: [backend_net]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+    security_opt: ["no-new-privileges:true"]
+
+  # Einmaliger Migrations-Lauf vor dem Backend. Nutzt die Build-Stage
+  # (enthält tsx + drizzle). Idempotent, niemals destruktiv.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: build
+    command: ["npm", "run", "db:migrate", "-w", "@humatter-leads/backend"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      DATABASE_SSL: ${DATABASE_SSL:-disable}
+    networks: [backend_net]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+    security_opt: ["no-new-privileges:true"]
+
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: runner
+      args:
+        NODE_VERSION: ${NODE_VERSION:-22.20.0}
+    restart: unless-stopped
+    # Kein `ports:` — nur intern erreichbar (über das Frontend-Proxy).
+    environment:
+      NODE_ENV: production
+      PORT: "8080"
+      DATABASE_URL: ${DATABASE_URL:?set in .env}
+      DATABASE_SSL: ${DATABASE_SSL:-disable}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+      SESSION_SECRET: ${SESSION_SECRET:?set in .env}
+      TRUST_PROXY: "true"
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      RATE_LIMIT_MAX_REQUESTS: ${RATE_LIMIT_MAX_REQUESTS:-120}
+    networks: [backend_net, web_net]
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    security_opt: ["no-new-privileges:true"]
+
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NODE_VERSION: ${NODE_VERSION:-22.20.0}
+    restart: unless-stopped
+    ports:
+      # Lokal nur an localhost. In Produktion sitzt der Reverse Proxy davor.
+      - "127.0.0.1:${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # Interne Backend-URL im Docker-Netzwerk (Service-Name).
+      BACKEND_INTERNAL_URL: http://backend:8080
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-humatter Leads}
+    networks: [web_net]
+    depends_on:
+      backend:
+        condition: service_started
+    security_opt: ["no-new-privileges:true"]
+
+networks:
+  backend_net:
+    internal: true
+  web_net:
+
+volumes:
+  db_data:

@@ -1,0 +1,33 @@
+# Lokale Entwicklung — NUR auf dem Dev-Rechner verwenden.
+#
+#   cp compose.override.yaml.example compose.override.yaml
+#
+# Docker Compose lädt `compose.override.yaml` automatisch zusätzlich.
+# Diese Datei veröffentlicht db/backend-Ports an 127.0.0.1, damit man
+# - vom Host aus `npm run dev` gegen die Container-DB laufen lassen kann
+# - das Backend direkt inspizieren kann
+#
+# NIEMALS auf dem Server verwenden. `compose.override.yaml` ist in
+# .gitignore und wird nicht deployt.
+
+services:
+  db:
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+
+  backend:
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+
+  # Optionale DB-UI: http://localhost:8081
+  adminer:
+    image: adminer:5
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${ADMINER_PORT:-8081}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    networks: [backend_net]
+    depends_on:
+      db:
+        condition: service_healthy

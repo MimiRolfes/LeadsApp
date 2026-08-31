@@ -1,0 +1,9 @@
+**/.next
+**/node_modules
+**/dist
+**/coverage
+**/playwright-report
+package-lock.json
+apps/backend/src/db/migrations/**
+apps/frontend/tsconfig.json
+*.md
