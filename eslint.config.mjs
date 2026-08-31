@@ -45,6 +45,9 @@ const config = [
       ],
       "no-unused-vars": "off",
       "no-undef": "off",
+      // value + gleichnamiger Typ (Zod-Pattern) ist in TS erlaubt
+      "no-redeclare": "off",
+      "@typescript-eslint/no-redeclare": "error",
     },
   },
   // Next.js-Regeln nur fürs Frontend

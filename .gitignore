@@ -25,6 +25,11 @@ test-results/
 # local-only compose override (host ports); never deployed
 compose.override.yaml
 
+# Markdown-Dokumentation bleibt lokal, nicht im Repo (außer README).
+# Interne Arbeitsanweisungen + Konzept-/Handover-Dokumente.
+*.md
+!README.md
+
 # misc
 .DS_Store
 *.pem

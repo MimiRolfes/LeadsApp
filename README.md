@@ -19,7 +19,7 @@ cd LeadsApp
 ## Status
 
 **Phase 1 — Datenbank & Container-Setup.** Auth, API-Endpunkte und der
-Erfassungs-Flow folgen. Fahrplan: [`docs/plan.md`](docs/plan.md).
+Erfassungs-Flow folgen. Fahrplan: `docs/plan.md` (lokal).
 
 | Phase | Inhalt | Status |
 | --- | --- | --- |
@@ -32,7 +32,7 @@ Erfassungs-Flow folgen. Fahrplan: [`docs/plan.md`](docs/plan.md).
 
 ## Architektur
 
-Drei getrennte Docker-Services (ADR [0004](docs/adr/0004-docker-hetzner-architecture.md)):
+Drei getrennte Docker-Services (ADR 0004, siehe `docs/adr/` lokal):
 
 ```
 Browser → HTTPS → [Reverse Proxy] → frontend (Next.js PWA)
@@ -96,14 +96,21 @@ cp .env.example .env   # echte Produktionswerte eintragen, dann: chmod 600 .env
 docker compose build && docker compose up -d
 ```
 
-- [`docs/HETZNER_DEPLOYMENT.md`](docs/HETZNER_DEPLOYMENT.md) — Handover (17 Punkte)
-- [`DEPLOYMENT_CHECKLIST.md`](DEPLOYMENT_CHECKLIST.md) — Schritt-für-Schritt
-- [`docs/backup-restore.md`](docs/backup-restore.md) — Backup/Restore
+Details (lokal, nicht im Repo): `docs/HETZNER_DEPLOYMENT.md` (Handover, 17 Punkte),
+`DEPLOYMENT_CHECKLIST.md` (Schritt für Schritt), `docs/backup-restore.md`.
+
+## Konten & Anmeldung
+
+Keine zentrale Benutzerverwaltung: Mitarbeitende legen ihr Konto selbst an.
+
+- `POST /api/auth/register` — E-Mail (**nur `@mindsewn.de`**) + Passwort (min. 12 Zeichen)
+- `POST /api/auth/login` · `POST /api/auth/logout` · `POST /api/auth/logout-all` · `GET /api/auth/me`
+
+Konfigurierbar über `ALLOWED_EMAIL_DOMAINS` (Default `mindsewn.de`) und
+`ADMIN_EMAILS`. Session als HttpOnly-Cookie.
 
 ## Dokumentation
 
-- [`docs/plan.md`](docs/plan.md) · [`docs/architecture.md`](docs/architecture.md)
-- [`docs/adr/`](docs/adr/) — Architektur-Entscheidungen
-- [`docs/data-model.md`](docs/data-model.md) · [`docs/retention.md`](docs/retention.md)
-- [`docs/threat-model.md`](docs/threat-model.md) · [`docs/design-system.md`](docs/design-system.md)
-- [`CHANGELOG.md`](CHANGELOG.md)
+Die ausführliche Doku liegt lokal unter `docs/` (Plan, Architektur, ADRs,
+Datenmodell, Threat-Model, Retention, Backup/Restore, Deployment-Handover)
+und in `CHANGELOG.md` — bewusst **nicht** im Repository.

@@ -1,13 +1,14 @@
 import { serve } from "@hono/node-server";
 import { logger as log } from "@humatter-leads/shared/logger";
 import { createApp } from "./app";
+import { getDb } from "./db/client";
 import { env } from "./env";
 
 /**
  * Backend-Entry. Bindet an 0.0.0.0:$PORT im Container. Der Port und alle
  * weiteren Werte kommen aus der Umgebung (src/env.ts).
  */
-const app = createApp();
+const app = createApp({ getDb });
 
 const server = serve(
   { fetch: app.fetch, port: env.PORT, hostname: "0.0.0.0" },

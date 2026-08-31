@@ -37,6 +37,25 @@ const EnvSchema = z.object({
     .default("false")
     .transform((v) => v === "true"),
 
+  /**
+   * Öffentliche Origin des Frontends (z. B. https://leads.example.de).
+   * Für den CSRF-Origin-Check bei state-changing Requests. Lokal:
+   * http://localhost:3000.
+   */
+  APP_ORIGIN: z.string().url().default("http://localhost:3000"),
+
+  // --- Registrierung / Rollen ---
+  /**
+   * Erlaubte E-Mail-Domains für die Selbstregistrierung, kommagetrennt.
+   * Nur Adressen dieser Domains dürfen ein Konto anlegen.
+   */
+  ALLOWED_EMAIL_DOMAINS: z.string().default("mindsewn.de"),
+  /**
+   * E-Mail-Adressen, die bei der Registrierung sofort die Rolle "admin"
+   * erhalten, kommagetrennt. Alle anderen werden "member".
+   */
+  ADMIN_EMAILS: z.string().optional(),
+
   // --- Datenbank ---
   DATABASE_URL: requiredInProd(z.string().url()),
   DATABASE_SSL: z.enum(["disable", "require", "no-verify"]).default("disable"),
@@ -46,6 +65,12 @@ const EnvSchema = z.object({
   SESSION_SECRET: requiredInProd(z.string().min(32)),
   SESSION_IDLE_TTL_MINUTES: z.coerce.number().int().positive().default(60),
   SESSION_ABSOLUTE_TTL_HOURS: z.coerce.number().int().positive().default(12),
+  SESSION_COOKIE_NAME: z.string().default("hl_session"),
+  /**
+   * `Secure`-Flag des Session-Cookies. Default: an, außer NODE_ENV != production
+   * (lokale Entwicklung über http). In Produktion immer an (HTTPS Pflicht).
+   */
+  SESSION_COOKIE_SECURE: z.enum(["auto", "true", "false"]).default("auto"),
 
   // --- Uploads / Objektspeicher ---
   UPLOAD_DRIVER: z.enum(["local", "s3"]).default("local"),
@@ -103,6 +128,30 @@ function parseOrThrow<S extends z.ZodTypeAny>(
 }
 
 export const env: Env = parseOrThrow(EnvSchema, process.env);
+
+function splitList(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/** Erlaubte E-Mail-Domains für die Selbstregistrierung. */
+export function allowedEmailDomains(): string[] {
+  return splitList(env.ALLOWED_EMAIL_DOMAINS);
+}
+
+/** E-Mails, die bei Registrierung die Admin-Rolle erhalten. */
+export function adminEmails(): string[] {
+  return splitList(env.ADMIN_EMAILS);
+}
+
+/** Ob das Session-Cookie das `Secure`-Flag tragen soll. */
+export function sessionCookieSecure(): boolean {
+  if (env.SESSION_COOKIE_SECURE === "true") return true;
+  if (env.SESSION_COOKIE_SECURE === "false") return false;
+  return env.NODE_ENV === "production";
+}
 
 export function corsOrigins(): string[] {
   return (env.CORS_ALLOWED_ORIGINS ?? "")
