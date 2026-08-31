@@ -4,6 +4,8 @@ import {
   EventCreateSchema,
   EventMemberAddSchema,
   EventUpdateSchema,
+  FollowupListQuerySchema,
+  FollowupTemplateCreateSchema,
   LeadCreateSchema,
   LeadListQuerySchema,
   QuestionCreateSchema,
@@ -19,6 +21,11 @@ import {
   isEventManager,
 } from "../authz";
 import { createLead, listLeads } from "../domain/leads";
+import {
+  createTemplate,
+  listEventFollowups,
+  listTemplates,
+} from "../domain/followups";
 import { clientIp } from "../lib/rate-limit";
 import {
   addMember,
@@ -246,5 +253,47 @@ eventsRoutes.post(
       { lead: result.lead },
       result.status === "created" ? 201 : 200,
     );
+  },
+);
+
+// --- Follow-ups (event-gescopt) --------------------------------
+
+eventsRoutes.get(
+  "/:eventId/followups",
+  zValidator("query", FollowupListQuerySchema, onInvalid),
+  async (c) => {
+    const event = await loadVisibleEvent(c);
+    const ctx = c.get("authz")!;
+    const q = c.req.valid("query");
+    const assigneeId = isEventManager(ctx, event.id)
+      ? q.assigneeId
+      : ctx.userId;
+    const items = await listEventFollowups(c.get("db"), {
+      eventId: event.id,
+      assigneeId,
+      status: q.status,
+      due: q.due,
+    });
+    return c.json({ followups: items });
+  },
+);
+
+eventsRoutes.get("/:eventId/followup-templates", async (c) => {
+  const event = await loadVisibleEvent(c);
+  return c.json({ templates: await listTemplates(c.get("db"), event.id) });
+});
+
+eventsRoutes.post(
+  "/:eventId/followup-templates",
+  zValidator("json", FollowupTemplateCreateSchema, onInvalid),
+  async (c) => {
+    const eventId = paramOr404(c, "eventId");
+    assertCanManageEvent(c.get("authz")!, eventId);
+    const template = await createTemplate(c.get("db"), {
+      actorId: c.get("user")!.id,
+      eventId,
+      input: c.req.valid("json"),
+    });
+    return c.json({ template }, 201);
   },
 );

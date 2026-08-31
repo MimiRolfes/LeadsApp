@@ -9,6 +9,8 @@ import { sessionMiddleware } from "./auth/middleware";
 import { auth } from "./routes/auth";
 import { eventsRoutes } from "./routes/events";
 import { leadRoutes } from "./routes/leads";
+import { followupRoutes } from "./routes/followups";
+import { syncRoutes } from "./routes/sync";
 import { createHealthRoutes } from "./routes/health";
 import { ApiError, errors, toErrorResponse } from "./lib/errors";
 
@@ -72,6 +74,8 @@ export function createApp(deps: {
   api.route("/auth", auth);
   api.route("/events", eventsRoutes);
   api.route("/leads", leadRoutes);
+  api.route("/followups", followupRoutes);
+  api.route("/sync", syncRoutes);
   app.route("/api", api);
 
   app.notFound((c) => c.json({ error: { code: "not_found" } }, 404));

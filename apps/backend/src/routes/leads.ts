@@ -1,6 +1,10 @@
 import { Hono, type Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { LeadNoteCreateSchema, LeadUpdateSchema } from "@humatter-leads/shared";
+import {
+  FollowupCreateSchema,
+  LeadNoteCreateSchema,
+  LeadUpdateSchema,
+} from "@humatter-leads/shared";
 import type { AppEnv } from "../types";
 import { requireAuthz } from "../auth/middleware";
 import { assertCanEditLead, assertCanViewLead } from "../authz";
@@ -11,6 +15,7 @@ import {
   softDeleteLead,
   updateLead,
 } from "../domain/leads";
+import { createFollowup } from "../domain/followups";
 import { errors } from "../lib/errors";
 import { onInvalid } from "../lib/validation";
 
@@ -76,5 +81,21 @@ leadRoutes.post(
       input: c.req.valid("json"),
     });
     return c.json({ note }, 201);
+  },
+);
+
+leadRoutes.post(
+  "/:leadId/followups",
+  zValidator("json", FollowupCreateSchema, onInvalid),
+  async (c) => {
+    const ref = await loadRef(c);
+    assertCanEditLead(c.get("authz")!, ref.eventId, ref.ownerId);
+    const followup = await createFollowup(c.get("db"), {
+      actorId: c.get("user")!.id,
+      leadId: ref.id,
+      eventId: ref.eventId,
+      input: c.req.valid("json"),
+    });
+    return c.json({ followup }, 201);
   },
 );

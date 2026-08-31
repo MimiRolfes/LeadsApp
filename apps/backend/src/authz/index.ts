@@ -105,6 +105,18 @@ export function assertCanEditLead(
   if (!canEditLead(ctx, eventId, ownerId)) deny("lead_edit_denied");
 }
 
+/** Follow-up bearbeiten: Event-Manager/Admin, der Zuständige oder der Lead-Owner. */
+export function assertCanEditFollowup(
+  ctx: AuthCtx,
+  eventId: string,
+  leadOwnerId: string | null,
+  assigneeId: string | null,
+): void {
+  if (isEventManager(ctx, eventId)) return;
+  if (assigneeId === ctx.userId || leadOwnerId === ctx.userId) return;
+  deny("followup_edit_denied");
+}
+
 /** Merge, Export, DSGVO-Aktionen, Fragenkatalog: Event-Manager/Admin. */
 export const assertCanMergeLeads = assertCanManageEvent;
 export const assertCanExport = assertCanManageEvent;
