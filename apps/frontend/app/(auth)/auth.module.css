@@ -2,51 +2,41 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: var(--space-6);
+  padding: var(--space-4);
   background:
     radial-gradient(
       120% 80% at 100% 0%,
       var(--brand-lavender) 0%,
-      transparent 60%
+      transparent 55%
     ),
     var(--color-bg);
 }
-
-.card {
-  max-width: 34rem;
+.panel {
   width: 100%;
+  max-width: 26rem;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-8);
   box-shadow: var(--shadow-md);
 }
-
-.kicker {
-  margin: 0 0 var(--space-2);
-  font-size: var(--text-sm);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.title {
-  font-size: var(--text-3xl);
+.brand {
+  font-family: var(--font-display);
+  font-size: var(--text-xl);
   color: var(--color-heading);
-  margin-bottom: var(--space-4);
+  margin: 0 0 var(--space-6);
 }
-
-.lead {
-  margin: 0 0 var(--space-4);
+.h1 {
+  font-family: var(--font-ui);
   font-size: var(--text-lg);
+  margin: 0 0 var(--space-4);
 }
-
-.meta {
-  margin: 0;
+.foot {
+  margin-top: var(--space-4);
   font-size: var(--text-sm);
   color: var(--color-text-muted);
-}
-
-.meta code {
-  font-size: 0.85em;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
 }
