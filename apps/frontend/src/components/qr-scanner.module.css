@@ -40,7 +40,10 @@
   gap: var(--space-3, 0.75rem);
   padding: var(--space-4, 1rem);
   padding-bottom: max(var(--space-4, 1rem), env(safe-area-inset-bottom));
-  background: var(--color-surface, #fff);
+  background: var(--glass-bg-strong, rgba(255, 255, 255, 0.82));
+  -webkit-backdrop-filter: var(--glass-blur, blur(20px));
+  backdrop-filter: var(--glass-blur, blur(20px));
+  border-top: 1px solid var(--glass-border, rgba(255, 255, 255, 0.75));
 }
 .hint {
   margin: 0;
@@ -50,10 +53,10 @@
 .close {
   flex-shrink: 0;
   min-height: var(--touch-min, 44px);
-  padding: 0 var(--space-4, 1rem);
-  border: 1px solid var(--color-border, #d9dced);
-  border-radius: var(--radius-md, 10px);
-  background: var(--color-surface, #fff);
+  padding: 0 var(--space-6, 1.5rem);
+  border: 1px solid var(--glass-border, #d9dced);
+  border-radius: var(--radius-pill, 999px);
+  background: var(--glass-bg, rgba(255, 255, 255, 0.6));
   color: var(--color-text, #10162f);
   font: inherit;
   font-weight: 600;

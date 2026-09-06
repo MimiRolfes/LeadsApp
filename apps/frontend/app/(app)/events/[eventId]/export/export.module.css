@@ -6,9 +6,12 @@
 .formatBtn {
   flex: 1;
   min-height: var(--touch-min);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight);
   color: var(--color-text);
   font: inherit;
   font-weight: 600;
@@ -18,12 +21,17 @@
   background: var(--color-accent);
   border-color: var(--color-accent);
   color: var(--color-text-on-accent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .fields {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: var(--space-4);
   margin: 0 0 var(--space-4);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight);
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
   gap: var(--space-2);

@@ -14,24 +14,33 @@
   width: 100%;
   min-height: var(--touch-min);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--glass-bg-strong);
   color: var(--color-text);
   font: inherit;
+  box-shadow: var(--glass-highlight);
+}
+.search:focus-visible {
+  border-color: var(--color-accent);
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
 }
 
 .list {
   list-style: none;
   margin: 0;
-  padding: 0;
-  border: 1px solid var(--color-border);
+  padding: var(--space-1);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
 }
 .list li + li {
-  border-top: 1px solid var(--color-border);
+  border-top: 1px solid color-mix(in srgb, var(--glass-border) 60%, transparent);
 }
 .row {
   display: grid;
@@ -40,11 +49,13 @@
   gap: 0 var(--space-3);
   align-items: center;
   padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
   text-decoration: none;
   color: var(--color-text);
+  transition: background-color 0.14s var(--ease-glass);
 }
 .row:hover {
-  background: var(--color-bg);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
 }
 .name {
   grid-area: name;

@@ -4,35 +4,51 @@
   justify-content: center;
   gap: var(--space-2);
   min-height: var(--touch-min);
-  padding: 0 var(--space-4);
-  border-radius: var(--radius-md);
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
   font: inherit;
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
   transition:
-    background-color 0.12s,
-    border-color 0.12s;
+    background-color 0.16s var(--ease-glass),
+    border-color 0.16s var(--ease-glass),
+    box-shadow 0.16s var(--ease-glass),
+    transform 0.12s var(--ease-glass);
+}
+.button:active:not(:disabled) {
+  transform: scale(0.97);
 }
 .button:disabled {
-  opacity: 0.55;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 .primary {
   background: var(--color-accent);
   color: var(--color-text-on-accent);
+  box-shadow:
+    0 6px 18px -6px color-mix(in srgb, var(--color-accent) 65%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 .primary:hover:not(:disabled) {
   background: var(--color-accent-hover);
 }
 .secondary {
-  background: var(--color-surface);
-  border-color: var(--color-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border-color: var(--glass-border);
   color: var(--color-text);
+  box-shadow: var(--glass-highlight);
 }
 .secondary:hover:not(:disabled) {
-  border-color: var(--color-accent);
+  border-color: color-mix(
+    in srgb,
+    var(--color-accent) 60%,
+    var(--glass-border)
+  );
 }
 .ghost {
   background: transparent;
@@ -41,6 +57,9 @@
 .danger {
   background: var(--status-danger);
   color: #fff;
+  box-shadow:
+    0 6px 18px -6px color-mix(in srgb, var(--status-danger) 60%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 .block {
   width: 100%;
@@ -63,11 +82,15 @@
   width: 100%;
   min-height: var(--touch-min);
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
+  background: var(--glass-bg-strong);
   color: var(--color-text);
   font: inherit;
+  box-shadow: var(--glass-highlight);
+  transition:
+    border-color 0.16s var(--ease-glass),
+    box-shadow 0.16s var(--ease-glass);
 }
 .textarea {
   min-height: 5rem;
@@ -77,6 +100,9 @@
 .select:focus-visible,
 .textarea:focus-visible {
   border-color: var(--color-accent);
+  box-shadow:
+    var(--glass-highlight),
+    0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
 }
 .hint {
   font-size: var(--text-xs);
@@ -90,18 +116,22 @@
 .alert {
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-highlight);
   margin-bottom: var(--space-4);
   font-size: var(--text-sm);
 }
 .alertError {
-  border-color: color-mix(in srgb, var(--status-danger) 40%, transparent);
-  background: color-mix(in srgb, var(--status-danger) 8%, transparent);
+  border-color: color-mix(in srgb, var(--status-danger) 45%, transparent);
+  background: color-mix(in srgb, var(--status-danger) 12%, var(--glass-bg));
   color: var(--status-danger);
 }
 .alertSuccess {
-  border-color: color-mix(in srgb, var(--status-success) 40%, transparent);
-  background: color-mix(in srgb, var(--status-success) 8%, transparent);
+  border-color: color-mix(in srgb, var(--status-success) 45%, transparent);
+  background: color-mix(in srgb, var(--status-success) 12%, var(--glass-bg));
   color: var(--status-success);
 }
 .alertInfo {
@@ -109,11 +139,17 @@
 }
 
 .card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  position: relative;
+  /* Spekular-Glanz auf dem Glas: Licht fängt sich an der oberen Kante. */
+  background:
+    linear-gradient(150deg, var(--glass-sheen) 0%, transparent 36%),
+    var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow), var(--glass-highlight);
 }
 
 .pageHeader {
@@ -127,6 +163,7 @@
 .pageHeader h1 {
   font-size: var(--text-2xl);
   color: var(--color-heading);
+  letter-spacing: -0.01em;
   margin: 0;
 }
 .pageHeader p {

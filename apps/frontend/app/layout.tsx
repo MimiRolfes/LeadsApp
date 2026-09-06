@@ -30,11 +30,18 @@ export const metadata: Metadata = {
     icon: "/icons/icon.svg",
     apple: "/icons/icon.svg",
   },
-  appleWebApp: { capable: true, title: "Leads", statusBarStyle: "black" },
+  appleWebApp: {
+    capable: true,
+    title: "Leads",
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#001540",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#eaecf7" },
+    { media: "(prefers-color-scheme: dark)", color: "#070a1c" },
+  ],
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

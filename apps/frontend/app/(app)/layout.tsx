@@ -18,7 +18,8 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         <div className={styles.brandArea}>
           <HeaderBack />
           <Link href="/" className={styles.logo}>
-            humatter <span>Leads</span>
+            <span className={styles.logoPrefix}>humatter </span>
+            <span>Leads</span>
           </Link>
         </div>
         <div className={styles.userArea}>
