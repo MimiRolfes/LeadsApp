@@ -1,15 +1,27 @@
 .kpis {
   list-style: none;
-  margin: 0 0 var(--space-8);
+  margin: 0 0 var(--space-6);
   padding: 0;
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 40rem) {
+  .kpis {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+@media (min-width: 60rem) {
+  .kpis {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
 .kpi {
   display: flex;
   flex-direction: column;
+  justify-content: center;
   gap: var(--space-1);
+  min-height: 5.5rem;
   padding: var(--space-4);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -97,7 +109,12 @@
 .quick {
   display: grid;
   gap: var(--space-3);
-  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  grid-template-columns: 1fr;
+}
+@media (min-width: 40rem) {
+  .quick {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 .quickCard {
   display: flex;
