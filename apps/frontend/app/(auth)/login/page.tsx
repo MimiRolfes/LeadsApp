@@ -4,7 +4,8 @@ import { Suspense, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { ApiError, apiPost } from "@/lib/api";
-import { Alert, Button, TextField } from "@/components/ui";
+import { AuthField } from "../auth-field";
+import { AuthMessage } from "../auth-message";
 import styles from "../auth.module.css";
 
 function LoginForm() {
@@ -43,18 +44,19 @@ function LoginForm() {
 
   return (
     <form onSubmit={submit} noValidate>
-      <h1 className={styles.h1}>Anmelden</h1>
-      {error ? <Alert kind="error">{error}</Alert> : null}
-      <TextField
+      <h1 className={styles.srOnly}>Anmelden</h1>
+      {error ? <AuthMessage kind="error">{error}</AuthMessage> : null}
+      <AuthField
         id="email"
         label="Work-E-Mail"
+        placeholder="Mail@mindsewn.de"
         type="email"
         autoComplete="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
       />
-      <TextField
+      <AuthField
         id="password"
         label="Passwort"
         type="password"
@@ -64,9 +66,10 @@ function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
       />
       {needsCode ? (
-        <TextField
+        <AuthField
           id="code"
           label="2FA-Code"
+          placeholder="6-stelliger Code"
           inputMode="numeric"
           autoComplete="one-time-code"
           pattern="\d{6}"
@@ -74,13 +77,13 @@ function LoginForm() {
           onChange={(e) => setCode(e.target.value)}
         />
       ) : null}
-      <Button type="submit" block disabled={busy}>
-        {busy ? "…" : "Anmelden"}
-      </Button>
       <div className={styles.foot}>
         <Link href="/register">Konto anlegen</Link>
         <Link href="/forgot-password">Passwort vergessen?</Link>
       </div>
+      <button type="submit" className={styles.submit} disabled={busy}>
+        {busy ? "…" : "Anmelden"}
+      </button>
     </form>
   );
 }

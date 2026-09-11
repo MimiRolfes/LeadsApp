@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { PASSWORD_HINT } from "@humatter-leads/shared";
 import { ApiError, apiPost } from "@/lib/api";
-import { Alert, Button, TextField } from "@/components/ui";
+import { AuthField } from "../auth-field";
+import { AuthMessage } from "../auth-message";
 import styles from "../auth.module.css";
 
 function ResetForm() {
@@ -32,9 +33,12 @@ function ResetForm() {
     return (
       <>
         <h1 className={styles.h1}>Ungültiger Link</h1>
-        <Alert kind="error">Der Link ist unvollständig oder abgelaufen.</Alert>
+        <AuthMessage kind="error">
+          Der Link ist unvollständig oder abgelaufen.
+        </AuthMessage>
         <div className={styles.foot}>
           <Link href="/forgot-password">Neuen Link anfordern</Link>
+          <span />
         </div>
       </>
     );
@@ -44,11 +48,12 @@ function ResetForm() {
     return (
       <>
         <h1 className={styles.h1}>Passwort gesetzt</h1>
-        <Alert kind="success">
+        <AuthMessage kind="success">
           Dein Passwort wurde geändert und du wurdest überall abgemeldet.
-        </Alert>
+        </AuthMessage>
         <div className={styles.foot}>
           <Link href="/login">Jetzt anmelden</Link>
+          <span />
         </div>
       </>
     );
@@ -57,8 +62,8 @@ function ResetForm() {
   return (
     <form onSubmit={submit} noValidate>
       <h1 className={styles.h1}>Neues Passwort</h1>
-      {error ? <Alert kind="error">{error}</Alert> : null}
-      <TextField
+      {error ? <AuthMessage kind="error">{error}</AuthMessage> : null}
+      <AuthField
         id="password"
         label="Neues Passwort"
         type="password"
@@ -68,9 +73,9 @@ function ResetForm() {
         onChange={(e) => setPassword(e.target.value)}
         hint={PASSWORD_HINT}
       />
-      <Button type="submit" block disabled={busy}>
+      <button type="submit" className={styles.submit} disabled={busy}>
         {busy ? "…" : "Passwort setzen"}
-      </Button>
+      </button>
     </form>
   );
 }

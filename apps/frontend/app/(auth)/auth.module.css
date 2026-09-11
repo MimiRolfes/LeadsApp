@@ -1,37 +1,294 @@
+/*
+ * Auth-Screens (Login/Registrierung/Passwort) — 1:1 aus dem Figma-Entwurf
+ * "Messe" (Login: node 37:113 Desktop / 37:157 Handy; Register: 57:318 /
+ * 57:339). Alle Maße unten sind aus Figma übernommene Pixelwerte (÷16 = rem),
+ * NICHT das generische Spacing-Raster des internen Dashboards — Handy und
+ * Desktop unterscheiden sich in der Datei bewusst (Button-Breite/-Radius,
+ * Logo-Ausrichtung), das wird hier per Breakpoint exakt nachgebildet.
+ *
+ * Einzige bewusste Abweichungen vom statischen Mock (Begründung siehe dort):
+ * Eingabetext linksbündig statt zentriert, volltonige Navy-Schrift beim
+ * Tippen statt der blassen Mock-Farbe.
+ */
+
 .main {
+  position: relative;
   min-height: 100dvh;
-  display: grid;
-  place-items: center;
-  padding: var(--space-4);
-}
-.panel {
-  width: 100%;
-  max-width: 26rem;
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-8);
-  box-shadow: var(--glass-shadow), var(--glass-highlight);
-}
-.brand {
-  font-family: var(--font-display);
-  font-size: var(--text-xl);
-  color: var(--color-heading);
-  margin: 0 0 var(--space-6);
-}
-.h1 {
-  font-family: var(--font-ui);
-  font-size: var(--text-lg);
-  margin: 0 0 var(--space-4);
-}
-.foot {
-  margin-top: var(--space-4);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
+  flex-direction: column;
+  align-items: center; /* horizontal — die Karte ist nie breiter als der Bildschirm */
+  padding: 1rem;
+  background: var(--brand-lavender);
+  overflow-x: hidden;
+  isolation: isolate;
+}
+
+/* --- Deko-Formen ---------------------------------------------------
+   Größe als vw-Anteil der jeweiligen Figma-Referenzbreite (Handy 393px /
+   Desktop 1440px) — dadurch bleibt das Größenverhältnis zum Viewport exakt
+   wie im Entwurf, auf jeder Bildschirmbreite. Anker exakt an der Kante, an
+   der Figma die Form vom Rahmen abschneidet. */
+.shape {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  user-select: none;
+}
+.shape img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.shapeRaspberry {
+  top: 0;
+  left: 0;
+  width: 100vw; /* Handy: 393/393 */
+}
+.shapeSponge {
+  bottom: 0;
+  right: 0;
+  width: 100vw; /* Handy: 393/393 */
+}
+@media (min-width: 56rem) {
+  .shapeRaspberry {
+    width: 53.2vw; /* Desktop: 766/1440 */
+  }
+  .shapeSponge {
+    width: 46.8vw; /* Desktop: 674/1440 */
+  }
+}
+
+/* --- Karte ----------------------------------------------------------
+   Handy: 281×~406px, Logo zentriert. Desktop: 490×~584px, Logo linksbündig,
+   Button schmaler als die Felder und mittig eingerückt.
+   Die Karte hat in Figma einen "Glass"-Effekt, den der Code-Export nicht
+   mit ausgibt (nur die Füllung rgba(212,228,255,0.76)). Der Blur-Radius ist
+   deshalb numerisch aus dem echten Figma-Rendering hergeleitet: Backdrop aus
+   Seitenfarbe + beiden Deko-Formen rekonstruiert, mit verschiedenen
+   Gauß-Radien überlagert und gegen den Frame-Screenshot verglichen. Klares
+   Minimum bei 4px (mittlerer Fehler 0,3 %), Desktop-Fit ergibt denselben
+   Wert. Der Effekt ist also viel subtiler als er "aussieht" — die Karte
+   wirkt vor allem durch die 76-%-Füllung hell, nicht durch starken Blur.
+   Kein Schlagschatten: der Export hat keinen. */
+.panel {
+  position: relative;
+  z-index: 1;
+  /* Vertikal zentriert via Auto-Margin statt align-items:center: passt die
+     Karte nicht in die Fensterhöhe, fällt das auf Ausrichtung am oberen
+     Rand zurück (0 statt auto), statt oben UND unten über den sichtbaren
+     Bereich hinauszuwachsen und den Anfang der Karte unerreichbar zu
+     machen. */
+  margin-top: auto;
+  margin-bottom: auto;
+  width: min(17.5625rem, 100% - 2rem); /* 281px */
+  background: rgba(212, 228, 255, 0.76);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  border-radius: 1.4375rem; /* 23px */
+  padding: 2rem 1.6875rem 4rem; /* 32 / 27 / 64px */
+}
+@media (min-width: 56rem) {
+  .panel {
+    width: 30.625rem; /* 490px */
+    padding: 5.125rem 3.1875rem 4.8125rem; /* 82 / 51 / 77px */
+  }
+}
+
+.logo {
+  display: block;
+  height: 1.6875rem; /* 27px */
+  width: 10rem; /* 160px */
+  margin: 0 auto 3.875rem; /* zentriert, 62px Abstand */
+}
+@media (min-width: 56rem) {
+  .logo {
+    height: 2.125rem; /* 34px */
+    width: 12.5625rem; /* 201px */
+    margin: 0 0 4.8125rem; /* linksbündig wie die Felder, 77px Abstand */
+  }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.h1 {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  color: var(--brand-navy);
+  margin: 0 0 1.5rem;
+}
+
+.message {
+  margin: 0 0 1rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.75rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--text-xs);
+  text-align: left;
+}
+@media (min-width: 56rem) {
+  .message {
+    font-size: var(--text-sm);
+    padding: 0.75rem 1rem;
+  }
+}
+.messageError {
+  background: rgba(192, 38, 38, 0.14);
+  color: #7a1c1c;
+}
+.messageSuccess {
+  background: rgba(31, 138, 76, 0.16);
+  color: #145c34;
+}
+
+/* Abstand liegt bewusst OBEN am Folgefeld statt unten am Feld: sonst
+   kollabiert der 30px-Feldabstand mit dem 9px-Abstand zur Link-Zeile zum
+   größeren Wert, und alles darunter rutscht 21px nach unten. */
+.field {
+  margin-bottom: 0;
+}
+.field + .field {
+  margin-top: 1.875rem; /* 30px (Feld 121+35=156 -> 186) */
+}
+@media (min-width: 56rem) {
+  .field + .field {
+    margin-top: 2.875rem; /* 46px (Feld 193+52=245 -> 291) */
+  }
+}
+
+.input {
+  width: 100%;
+  min-height: 2.1875rem; /* 35px */
+  padding: 0 0.75rem; /* 12px, gemessen am Figma-Rendering */
+  border: 0;
+  border-radius: 0.75rem; /* 12px */
+  background: rgba(45, 123, 255, 0.57);
+  color: var(--brand-navy);
+  font-family: var(--font-display);
+  font-weight: 700; /* Inria Serif Bold */
+  font-size: 0.75rem; /* 12px */
+  text-align: left;
+}
+@media (min-width: 56rem) {
+  .input {
+    min-height: 3.25rem; /* 52px */
+    padding: 0 1rem; /* 16px (Feld 51 -> Text 67) */
+    font-size: 1.125rem; /* 18px */
+  }
+}
+.input::placeholder {
+  color: rgba(11, 20, 68, 0.6);
+  font-weight: 700;
+}
+.input:focus-visible {
+  outline: 2px solid var(--brand-navy);
+  outline-offset: 2px;
+}
+
+.hint {
+  display: block;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  color: rgba(11, 20, 68, 0.62);
+}
+.error {
+  display: block;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--status-danger);
+}
+
+.foot {
+  display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 0.5625rem 0 3.9375rem; /* 9 / 63px (Feld endet 221, Text 230-246, Button 309) */
+  font-family: var(--font-display);
+  font-size: 0.625rem; /* 10px */
+  line-height: 1rem; /* 16px — Figma-Textbox 230…246 */
+  font-weight: 700;
+  color: rgba(11, 20, 68, 0.58);
+}
+@media (min-width: 56rem) {
+  .foot {
+    /* Bündig zu den Eingabefeldern (links Feldkante, rechts Feldkante).
+       Figmas Labels sitzen minimal eingerückt (71…424), das ist im Entwurf
+       aber unsauber gesetzt — bündig ist gewollt. */
+    margin: 0.625rem 0 4.9375rem; /* 10 / 79px */
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.4375rem; /* 23px — Figma-Textbox 353…376 */
+  }
+}
+.foot a {
+  color: inherit;
+  text-decoration: none;
+}
+.foot a:hover {
+  text-decoration: underline;
+}
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%; /* Handy: so breit wie die Felder */
+  min-height: 2.0625rem; /* 33px */
+  border: 0;
+  border-radius: 0.75rem; /* 12px */
+  background: var(--brand-navy);
+  color: #f3f4f8;
+  font-family: var(--font-display);
+  font-weight: 400; /* Inria Serif Regular */
+  font-size: 0.8125rem; /* 13px */
+  cursor: pointer;
+  transition: background-color 0.16s ease;
+}
+@media (min-width: 56rem) {
+  .submit {
+    width: 88.6%; /* 343/387 — schmaler als die Felder, mittig */
+    margin: 0 auto;
+    min-height: 3.25rem; /* 52px */
+    border-radius: 1.3125rem; /* 21px */
+    font-size: 1.25rem; /* 20px */
+  }
+}
+.submit:hover:not(:disabled) {
+  background: var(--brand-navy-soft);
+}
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.mascot {
+  position: absolute;
+  z-index: 1;
+  left: 2.125rem; /* 34px, Figma Handy */
+  bottom: 2.5rem; /* 40px */
+  width: 2.4375rem; /* 39px */
+  height: 2.4375rem;
+  border-radius: 999px;
+  pointer-events: none;
+}
+@media (min-width: 56rem) {
+  .mascot {
+    left: 4.8125rem; /* 77px */
+    bottom: 1.5rem; /* 24px */
+    width: 3.8125rem; /* 61px */
+    height: 3.8125rem;
+  }
 }

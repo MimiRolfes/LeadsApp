@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PASSWORD_HINT, RegisterInputSchema } from "@humatter-leads/shared";
+import { RegisterInputSchema } from "@humatter-leads/shared";
 import { ApiError, apiPost } from "@/lib/api";
-import { Alert, Button, TextField } from "@/components/ui";
+import { AuthField } from "../auth-field";
+import { AuthMessage } from "../auth-message";
 import styles from "../auth.module.css";
 
 export default function RegisterPage() {
@@ -45,9 +46,9 @@ export default function RegisterPage() {
 
   return (
     <form onSubmit={submit} noValidate>
-      <h1 className={styles.h1}>Konto anlegen</h1>
-      {error ? <Alert kind="error">{error}</Alert> : null}
-      <TextField
+      <h1 className={styles.srOnly}>Konto anlegen</h1>
+      {error ? <AuthMessage kind="error">{error}</AuthMessage> : null}
+      <AuthField
         id="name"
         label="Name"
         autoComplete="name"
@@ -55,18 +56,18 @@ export default function RegisterPage() {
         onChange={(e) => setName(e.target.value)}
         error={fieldErrors.displayName?.[0]}
       />
-      <TextField
+      <AuthField
         id="email"
         label="Work-E-Mail"
+        placeholder="Mail@mindsewn.de"
         type="email"
         autoComplete="email"
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         error={fieldErrors.email?.[0]}
-        hint="Nur @mindsewn.de-Adressen"
       />
-      <TextField
+      <AuthField
         id="password"
         label="Passwort"
         type="password"
@@ -75,14 +76,14 @@ export default function RegisterPage() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         error={fieldErrors.password?.[0]}
-        hint={PASSWORD_HINT}
       />
-      <Button type="submit" block disabled={busy}>
-        {busy ? "…" : "Konto anlegen"}
-      </Button>
       <div className={styles.foot}>
-        <Link href="/login">Zurück zur Anmeldung</Link>
+        <span>Mindestens 6 Zeichen und eine Ziffer</span>
+        <Link href="/login">Anmelden</Link>
       </div>
+      <button type="submit" className={styles.submit} disabled={busy}>
+        {busy ? "…" : "Registrieren"}
+      </button>
     </form>
   );
 }
