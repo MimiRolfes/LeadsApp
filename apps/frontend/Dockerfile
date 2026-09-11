@@ -25,8 +25,12 @@ WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /repo/node_modules ./node_modules
 COPY . .
-# Platzhalter nur für den Build; echte Werte zur Laufzeit via ENV.
 ENV NODE_ENV=production
+# Next.js wertet next.config `rewrites()` beim BUILD aus und schreibt das Ziel
+# fest in routes-manifest.json — Laufzeit-ENV wird dafür NICHT mehr gelesen.
+# Der /api-Proxy muss daher schon hier auf den Compose-Service-Namen zeigen.
+ARG BACKEND_INTERNAL_URL=http://backend:8080
+ENV BACKEND_INTERNAL_URL=${BACKEND_INTERNAL_URL}
 RUN npm run build -w @humatter-leads/frontend
 
 # --- runner ---------------------------------------------------------

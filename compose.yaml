@@ -49,6 +49,9 @@ services:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL:?set in .env}
       DATABASE_SSL: ${DATABASE_SSL:-disable}
+      # env.ts validiert das komplette Schema beim Import — SESSION_SECRET
+      # ist in Produktion Pflicht, auch wenn der Migrations-Runner es nicht nutzt.
+      SESSION_SECRET: ${SESSION_SECRET:?set in .env}
     networks: [backend_net]
     depends_on:
       db:
@@ -69,6 +72,7 @@ services:
       NODE_ENV: production
       DATABASE_URL: ${DATABASE_URL:?set in .env}
       DATABASE_SSL: ${DATABASE_SSL:-disable}
+      SESSION_SECRET: ${SESSION_SECRET:?set in .env}
     networks: [backend_net]
     restart: "no"
     security_opt: ["no-new-privileges:true"]
