@@ -29,6 +29,7 @@ Scanner und Visitenkarten-Kamera sind umgesetzt. Als Nächstes: Security-Review
 | 1 | DB-Schema, Migrationen, Docker-Setup, Retention-Konzept | ✅ |
 | 2 | Backend: Auth, AuthZ, Leads, Sync, Export, DSGVO-Rechte | ✅ |
 | 3 | Frontend: PWA, Capture-Flow, Dashboard, QR-/Kamera-Scan | ✅ |
+| 3.5 | Redesign nach Figma „Messe": Login/Registrierung, Home, Event anlegen/löschen, Visitenkarten-Texterkennung on-device | ✅ |
 | 4 | Security-Review | offen |
 | 5 | QA + Release (inkl. Container-/Persistenz-Tests) | offen |
 
