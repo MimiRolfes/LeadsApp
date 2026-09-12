@@ -102,11 +102,7 @@ export default function CapturePage({
 
   const [scanOpen, setScanOpen] = useState(false);
   const [scanInfo, setScanInfo] = useState<string | null>(null);
-  const [cardFile, setCardFile] = useState<File | null>(null);
   const [cardPreview, setCardPreview] = useState<string | null>(null);
-  const [cardUpload, setCardUpload] = useState<
-    "idle" | "working" | "done" | "error"
-  >("idle");
   const cardInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -162,40 +158,18 @@ export default function CapturePage({
     [contact],
   );
 
+  /**
+   * Das Foto der Visitenkarte dient nur als Lesehilfe beim Ausfüllen und
+   * bleibt auf dem Gerät — es wird bewusst NICHT hochgeladen oder
+   * gespeichert und beim Verlassen der Seite verworfen (Datensparsamkeit).
+   */
   async function pickCard(file: File) {
-    setCardUpload("idle");
     const jpeg = await downscaleToJpeg(file).catch(() => file);
-    setCardFile(jpeg);
     setCardPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(jpeg);
     });
   }
-
-  const uploadCard = useCallback(
-    async (leadId: string) => {
-      if (!cardFile) return;
-      setCardUpload("working");
-      try {
-        const fd = new FormData();
-        fd.append("file", cardFile);
-        const res = await fetch(`/api/leads/${leadId}/attachments`, {
-          method: "POST",
-          body: fd,
-        });
-        setCardUpload(res.ok ? "done" : "error");
-      } catch {
-        setCardUpload("error");
-      }
-    },
-    [cardFile],
-  );
-
-  useEffect(() => {
-    if (saved?.id && cardFile && cardUpload === "idle") {
-      void uploadCard(saved.id);
-    }
-  }, [saved, cardFile, cardUpload, uploadCard]);
 
   function resetForm() {
     setContact(EMPTY);
@@ -210,8 +184,6 @@ export default function CapturePage({
     setSaved(null);
     setQueued(false);
     setScanInfo(null);
-    setCardFile(null);
-    setCardUpload("idle");
     setCardPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -273,12 +245,6 @@ export default function CapturePage({
             Der Lead liegt lokal in der Warteschlange und wird synchronisiert,
             sobald wieder eine Verbindung besteht.
           </Alert>
-          {cardFile ? (
-            <Alert kind="error">
-              Die fotografierte Visitenkarte kann offline nicht hochgeladen
-              werden. Bitte am Lead ergänzen, sobald wieder Verbindung besteht.
-            </Alert>
-          ) : null}
           <Row>
             <Button onClick={resetForm}>Nächsten Lead erfassen</Button>
             <LinkButton variant="secondary" href={`/events/${eventId}/leads`}>
@@ -301,23 +267,6 @@ export default function CapturePage({
               "Lead"}{" "}
             wurde erfasst.
           </Alert>
-          {cardFile ? (
-            <Alert
-              kind={
-                cardUpload === "done"
-                  ? "success"
-                  : cardUpload === "error"
-                    ? "error"
-                    : "info"
-              }
-            >
-              {cardUpload === "done"
-                ? "Visitenkarte als Anhang gespeichert."
-                : cardUpload === "error"
-                  ? "Visitenkarte konnte nicht hochgeladen werden — am Lead erneut versuchen."
-                  : "Visitenkarte wird hochgeladen…"}
-            </Alert>
-          ) : null}
           <Row>
             <Button onClick={resetForm}>Nächsten Lead erfassen</Button>
             <LinkButton variant="secondary" href={`/leads/${saved.id}`}>
@@ -394,14 +343,13 @@ export default function CapturePage({
           <img src={cardPreview} alt="Fotografierte Visitenkarte" />
           <div>
             <span>
-              Visitenkarte angehängt — wird nach dem Speichern hochgeladen.
+              Nur als Lesehilfe — das Foto bleibt auf diesem Gerät und wird
+              nicht gespeichert.
             </span>
             <button
               type="button"
               className={styles.inlineBtn}
               onClick={() => {
-                setCardFile(null);
-                setCardUpload("idle");
                 setCardPreview((prev) => {
                   if (prev) URL.revokeObjectURL(prev);
                   return null;
