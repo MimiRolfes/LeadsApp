@@ -18,10 +18,11 @@ cd LeadsApp
 
 ## Status
 
-**Phase 3 abgeschlossen — Frontend steht.** Backend (Auth, AuthZ, Leads, Sync,
+**Phase 3 abgeschlossen, Phase 4 läuft.** Backend (Auth, AuthZ, Leads, Sync,
 Export, DSGVO) und die mobile PWA inkl. Erfassungs-Flow, Dashboard, QR-Badge-
-Scanner und Visitenkarten-Kamera sind umgesetzt. Als Nächstes: Security-Review
-(Phase 4) und QA/Release (Phase 5). Fahrplan: `docs/plan.md` (lokal).
+Scanner und Visitenkarten-Kamera sind umgesetzt. Aktuell wird die Oberfläche
+nach der Figma-Datei „Messe" neu gebaut (Phase 4). Danach: Security-Review
+(Phase 5) und QA/Release (Phase 6). Fahrplan: `docs/plan.md` (lokal).
 
 | Phase | Inhalt | Status |
 | --- | --- | --- |
@@ -29,9 +30,9 @@ Scanner und Visitenkarten-Kamera sind umgesetzt. Als Nächstes: Security-Review
 | 1 | DB-Schema, Migrationen, Docker-Setup, Retention-Konzept | ✅ |
 | 2 | Backend: Auth, AuthZ, Leads, Sync, Export, DSGVO-Rechte | ✅ |
 | 3 | Frontend: PWA, Capture-Flow, Dashboard, QR-/Kamera-Scan | ✅ |
-| 3.5 | Redesign nach Figma „Messe": Login/Registrierung, Home, Event anlegen/löschen, Visitenkarten-Texterkennung on-device | ✅ |
-| 4 | Security-Review | offen |
-| 5 | QA + Release (inkl. Container-/Persistenz-Tests) | offen |
+| 4 | Redesign nach Figma „Messe" (Login/Registrierung, Home, Event anlegen/löschen, Visitenkarten-Texterkennung on-device) | in Arbeit |
+| 5 | Security-Review | offen |
+| 6 | QA + Release (inkl. Container-/Persistenz-Tests) | offen |
 
 > Noch offen vor Go-Live: Security-Review, QA/E2E, SMTP-Anbindung für
 > Passwort-Reset (aktuell `log`-Treiber), EU/EWR-Region verifizieren, XLSX-Export.
