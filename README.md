@@ -20,7 +20,7 @@ cd LeadsApp
 
 **Phase 3 abgeschlossen, Phase 4 läuft.** Backend (Auth, AuthZ, Leads, Sync,
 Export, DSGVO) und die mobile PWA inkl. Erfassungs-Flow, Dashboard, QR-Badge-
-Scanner und Visitenkarten-Kamera sind umgesetzt. Aktuell wird die Oberfläche
+Scanner und Visitenkarten-Erkennung sind umgesetzt. Aktuell wird die Oberfläche
 nach der Figma-Datei „Messe" neu gebaut (Phase 4). Danach: Security-Review
 (Phase 5) und QA/Release (Phase 6). Fahrplan: `docs/plan.md` (lokal).
 
@@ -39,7 +39,8 @@ nach der Figma-Datei „Messe" neu gebaut (Phase 4). Danach: Security-Review
 
 ## Architektur
 
-Drei getrennte Docker-Services (ADR 0004, siehe `docs/adr/` lokal):
+Drei getrennte Laufzeit-Services (ADR 0004, siehe `docs/adr/` lokal); dazu
+`migrate` (läuft einmalig vor dem Start) und `retention` (Aufräum-Job):
 
 ```
 Browser → HTTPS → [Reverse Proxy] → frontend (Next.js PWA)
@@ -87,7 +88,7 @@ cp compose.override.yaml.example compose.override.yaml   # öffnet db-Port lokal
 docker compose up -d db
 # in .env: DB_DRIVER=postgres, DATABASE_URL auf localhost, dann:
 npm run db:migrate && npm run db:seed
-npm run dev:backend -w @humatter-leads/backend  # bzw. dev:postgres
+npm run dev:postgres -w @humatter-leads/backend   # `dev` erzwingt PGlite
 ```
 
 ### Nützliche Scripts (Repo-Wurzel)
@@ -96,8 +97,8 @@ npm run dev:backend -w @humatter-leads/backend  # bzw. dev:postgres
 | --- | --- |
 | `npm run dev` | backend + frontend parallel |
 | `npm run build` | beide Apps bauen (esbuild-Bundle + Next standalone) |
-| `npm run check` | typecheck + lint + format:check + test (= CI) |
-| `npm run test` | Vitest (shared + backend, DB-Tests via PGlite) |
+| `npm run check` | typecheck + lint + format:check + test (CI baut zusätzlich) |
+| `npm run test` | Vitest (shared + backend + frontend, DB-Tests via PGlite) |
 | `npm run db:generate` | neue Migration aus Schema-Änderung |
 | `npm run db:migrate` / `db:seed` | Migrationen / fiktiver Seed |
 
@@ -130,11 +131,18 @@ Konfigurierbar über `ALLOWED_EMAIL_DOMAINS` (Default `mindsewn.de`) und
 - **QR-Code scannen** — Aussteller-/Besucher-Badges: vCard, MECARD, `mailto:`,
   Veranstalter-Lead-Links und Klartext werden erkannt; nur leere Felder werden
   vorbefüllt. Native `BarcodeDetector` wo verfügbar, sonst `jsQR`.
-- **Visitenkarte fotografieren** — Foto wird im Browser verkleinert (JPEG) und
-  als Anhang an den Lead gehängt.
+- **Visitenkarte fotografieren** — Texterkennung läuft **auf dem Gerät**
+  (Tesseract/WASM, deutsch + englisch; Worker und Sprachmodelle liegen unter
+  `apps/frontend/public/ocr/`, also kein Aufruf bei Dritten). Erkannt werden
+  Name, Firma, Position, E-Mail und Telefon; auch hier werden nur leere Felder
+  vorbefüllt, die Werte sind Vorschläge und wollen geprüft werden.
+  **Das Foto wird nicht gespeichert** und verlässt das Gerät nicht — es dient
+  nur als Lesehilfe und wird beim Verlassen der Seite verworfen. Der Knopf
+  erscheint nur auf Geräten mit Kamera.
 - Kamerazugriff erfordert **HTTPS** (oder `localhost`) — im Betrieb also nur
-  hinter TLS. Ohne Netz landet der Lead in der Offline-Warteschlange; das
-  Kartenfoto muss dann nach dem Sync ergänzt werden.
+  hinter TLS. Ohne Netz landet der Lead in der Offline-Warteschlange; die
+  Kartenerkennung funktioniert offline weiter, sobald die Modelle einmal
+  geladen sind (Service Worker).
 
 ## Dokumentation
 
