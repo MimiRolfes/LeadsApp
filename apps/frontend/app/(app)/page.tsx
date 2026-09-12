@@ -49,12 +49,14 @@ export default async function HomePage() {
                   <span className={styles.place}>{event.location ?? ""}</span>
                 </span>
 
-                {/* Die Kennzahlen stehen so im Entwurf; das Backend liefert
-                    bisher weder Lead-Zahlen noch die Zustände
-                    "Contacted"/"Replied" — daher vorerst ohne Werte. */}
+                {/* "Contacted"/"Replied" stehen so im Entwurf, das
+                    Datenmodell kennt diese Zustände aber nicht — sie bleiben
+                    ohne Wert, bis feststeht, was sie zählen sollen. */}
                 <span className={styles.stats}>
                   <span>
-                    <span className={styles.statValue}>–</span>
+                    <span className={styles.statValue}>
+                      {event.leadCount ?? "–"}
+                    </span>
                     <span className={styles.statLabel}>Leads</span>
                   </span>
                   <span>

@@ -192,4 +192,39 @@ describe("events & authz", () => {
     ).events.map((e) => e.name);
     expect(names).toContain("Fremdes Event");
   });
+
+  it("the event list reports how many leads were captured", async () => {
+    const mgr = await registerAndLogin("count@mindsewn.de");
+    const created = await req("/api/events", mgr, {
+      method: "POST",
+      json: { name: "Zaehl-Messe" },
+    });
+    const { event } = (await created.json()) as { event: { id: string } };
+
+    async function leadCount(): Promise<number | undefined> {
+      const res = await req("/api/events", mgr);
+      const { events: list } = (await res.json()) as {
+        events: { id: string; leadCount: number }[];
+      };
+      return list.find((e) => e.id === event.id)?.leadCount;
+    }
+
+    expect(await leadCount()).toBe(0);
+
+    for (const lastName of ["Eins", "Zwei"]) {
+      await req(`/api/events/${event.id}/leads`, mgr, {
+        method: "POST",
+        json: { clientLocalId: crypto.randomUUID(), lastName },
+      });
+    }
+    expect(await leadCount()).toBe(2);
+
+    // Weich gelöschte Leads zählen nicht mehr mit.
+    const leadsRes = await req(`/api/events/${event.id}/leads`, mgr);
+    const { leads: rows } = (await leadsRes.json()) as {
+      leads: { id: string }[];
+    };
+    await req(`/api/leads/${rows[0]!.id}`, mgr, { method: "DELETE" });
+    expect(await leadCount()).toBe(1);
+  });
 });

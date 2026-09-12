@@ -57,21 +57,46 @@ export async function createEvent(
   });
 }
 
+/**
+ * Erfasste Leads je Event — als korrelierte Unterabfrage, damit die Liste
+ * ein einziger Request bleibt. Weich gelöschte zählen nicht mit;
+ * anonymisierte schon, denn gescannt wurden sie.
+ */
+const leadCountSql = sql<number>`(
+  select count(*)::int from ${leads}
+  where ${leads.eventId} = ${events.id} and ${leads.deletedAt} is null
+)`;
+
 export async function listEventsForUser(
   db: Db,
   ctx: AuthCtx,
-): Promise<Array<EventRow & { myRole: string | null }>> {
+): Promise<Array<EventRow & { myRole: string | null; leadCount: number }>> {
   if (ctx.isAdmin) {
-    const rows = await db.select().from(events).orderBy(asc(events.name));
-    return rows.map((e) => ({ ...e, myRole: ctx.eventRole(e.id) ?? "admin" }));
+    const rows = await db
+      .select({ event: events, leadCount: leadCountSql })
+      .from(events)
+      .orderBy(asc(events.name));
+    return rows.map((r) => ({
+      ...r.event,
+      myRole: ctx.eventRole(r.event.id) ?? "admin",
+      leadCount: r.leadCount,
+    }));
   }
   const rows = await db
-    .select({ event: events, role: eventMembers.eventRole })
+    .select({
+      event: events,
+      role: eventMembers.eventRole,
+      leadCount: leadCountSql,
+    })
     .from(eventMembers)
     .innerJoin(events, eq(events.id, eventMembers.eventId))
     .where(eq(eventMembers.userId, ctx.userId))
     .orderBy(asc(events.name));
-  return rows.map((r) => ({ ...r.event, myRole: r.role }));
+  return rows.map((r) => ({
+    ...r.event,
+    myRole: r.role,
+    leadCount: r.leadCount,
+  }));
 }
 
 export async function getEvent(

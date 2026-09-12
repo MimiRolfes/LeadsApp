@@ -16,6 +16,8 @@ export interface EventDto {
   status: EventStatus;
   retentionDays: number | null;
   myRole?: string | null;
+  /** Erfasste Leads (nur in der Event-Liste gesetzt). */
+  leadCount?: number;
 }
 
 export interface QuestionDto {
