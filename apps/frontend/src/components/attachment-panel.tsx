@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ApiError, apiDelete, apiGet } from "@/lib/api";
 import { formatDateTime } from "@/lib/format";
-import { downscaleToJpeg } from "@/lib/image";
 import { Alert, Button, Card, Row } from "./ui";
 import styles from "./lead-detail.module.css";
 
@@ -16,12 +15,18 @@ interface AttachmentDto {
   createdAt: string;
 }
 
+/**
+ * Anhänge eines Leads (Dokumente, z. B. ein Angebot oder eine Broschüre).
+ *
+ * Bewusst OHNE Kamera-Aufnahme: Visitenkartenfotos werden nirgends
+ * gespeichert. Sie werden bei der Erfassung nur ausgelesen und danach
+ * verworfen (siehe `src/lib/card-ocr.ts`).
+ */
 export function AttachmentPanel({ leadId }: { leadId: string }) {
   const [items, setItems] = useState<AttachmentDto[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const cameraRef = useRef<HTMLInputElement>(null);
 
   async function load() {
     try {
@@ -66,13 +71,7 @@ export function AttachmentPanel({ leadId }: { leadId: string }) {
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
-      if (cameraRef.current) cameraRef.current.value = "";
     }
-  }
-
-  async function uploadPhoto(file: File) {
-    const jpeg = await downscaleToJpeg(file).catch(() => file);
-    await upload(jpeg);
   }
 
   return (
@@ -121,33 +120,14 @@ export function AttachmentPanel({ leadId }: { leadId: string }) {
           if (f) void upload(f);
         }}
       />
-      <input
-        ref={cameraRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className={styles.fileInput}
-        onChange={(e) => {
-          const f = e.target.files?.[0];
-          if (f) void uploadPhoto(f);
-        }}
-      />
       <Row>
-        <Button
-          type="button"
-          variant="secondary"
-          disabled={busy}
-          onClick={() => cameraRef.current?.click()}
-        >
-          {busy ? "Lädt…" : "Visitenkarte / Foto aufnehmen"}
-        </Button>
         <Button
           type="button"
           variant="secondary"
           disabled={busy}
           onClick={() => fileRef.current?.click()}
         >
-          Datei hochladen
+          {busy ? "Lädt…" : "Datei hochladen"}
         </Button>
       </Row>
     </Card>

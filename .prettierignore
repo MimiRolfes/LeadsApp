@@ -7,3 +7,4 @@ package-lock.json
 apps/backend/src/db/migrations/**
 apps/frontend/tsconfig.json
 *.md
+apps/frontend/public/ocr/**

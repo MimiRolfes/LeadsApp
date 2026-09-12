@@ -104,6 +104,8 @@ export default function CapturePage({
   const [scanInfo, setScanInfo] = useState<string | null>(null);
   const [cardPreview, setCardPreview] = useState<string | null>(null);
   const cardInputRef = useRef<HTMLInputElement>(null);
+  const [hasCamera, setHasCamera] = useState(false);
+  const [ocr, setOcr] = useState<"idle" | "working" | "done" | "error">("idle");
 
   useEffect(() => {
     apiGet<{ questions: QuestionDto[] }>(`/events/${eventId}/questions`)
@@ -116,6 +118,40 @@ export default function CapturePage({
       if (cardPreview) URL.revokeObjectURL(cardPreview);
     };
   }, [cardPreview]);
+
+  // Die Texterkennung läuft ein paar Sekunden. Damit sie nur Felder füllt,
+  // die zum ERGEBNIS-Zeitpunkt noch leer sind, wird der aktuelle Stand
+  // mitgeführt — sonst überschriebe sie, was währenddessen getippt wurde.
+  const contactRef = useRef(contact);
+  useEffect(() => {
+    contactRef.current = contact;
+  }, [contact]);
+
+  // Foto-Erfassung nur anbieten, wo es eine Kamera gibt — am Schreibtisch
+  // fotografiert niemand eine Visitenkarte.
+  useEffect(() => {
+    let active = true;
+    navigator.mediaDevices
+      ?.enumerateDevices()
+      .then((devices) => {
+        if (active) setHasCamera(devices.some((d) => d.kind === "videoinput"));
+      })
+      .catch(() => {
+        /* keine Berechtigung/Unterstützung -> Knopf bleibt aus */
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Erkennungs-Worker beim Verlassen der Seite freigeben.
+  useEffect(() => {
+    return () => {
+      void import("@/lib/card-ocr-browser").then((m) =>
+        m.releaseCardRecognizer(),
+      );
+    };
+  }, []);
 
   function set<K extends keyof Contact>(k: K, v: string) {
     setContact((c) => ({ ...c, [k]: v }));
@@ -169,6 +205,37 @@ export default function CapturePage({
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(jpeg);
     });
+
+    // Texterkennung läuft auf dem Gerät; das Foto verlässt es nicht.
+    setOcr("working");
+    setScanInfo(null);
+    try {
+      const { browserCardRecognizer } = await import("@/lib/card-ocr-browser");
+      const { fields } = await browserCardRecognizer.recognize(jpeg);
+
+      // Nur leere Felder füllen — von Hand Eingetragenes bleibt stehen,
+      // genau wie beim QR-Scan.
+      const current = contactRef.current;
+      const patch: Partial<Contact> = {};
+      const applied: string[] = [];
+      for (const key of Object.keys(EMPTY) as (keyof Contact)[]) {
+        const value = fields[key as keyof typeof fields];
+        if (typeof value === "string" && value && !current[key].trim()) {
+          patch[key] = value;
+          applied.push(CONTACT_FIELD_LABEL[key] ?? key);
+        }
+      }
+      if (applied.length) setContact((c) => ({ ...c, ...patch }));
+
+      setOcr("done");
+      setScanInfo(
+        applied.length
+          ? `Aus der Visitenkarte übernommen: ${applied.join(", ")}. Bitte kurz prüfen.`
+          : "Auf der Visitenkarte war nichts eindeutig lesbar — bitte von Hand eintragen.",
+      );
+    } catch {
+      setOcr("error");
+    }
   }
 
   function resetForm() {
@@ -184,6 +251,7 @@ export default function CapturePage({
     setSaved(null);
     setQueued(false);
     setScanInfo(null);
+    setOcr("idle");
     setCardPreview((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;
@@ -303,13 +371,18 @@ export default function CapturePage({
         >
           QR-Code scannen
         </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => cardInputRef.current?.click()}
-        >
-          Visitenkarte fotografieren
-        </Button>
+        {hasCamera ? (
+          <Button
+            type="button"
+            variant="secondary"
+            disabled={ocr === "working"}
+            onClick={() => cardInputRef.current?.click()}
+          >
+            {ocr === "working"
+              ? "Karte wird gelesen…"
+              : "Visitenkarte fotografieren"}
+          </Button>
+        ) : null}
         <input
           ref={cardInputRef}
           type="file"
@@ -337,6 +410,13 @@ export default function CapturePage({
         </Alert>
       ) : null}
 
+      {ocr === "error" ? (
+        <Alert kind="error">
+          Die Karte konnte nicht gelesen werden — bitte die Felder von Hand
+          ausfüllen. Das Foto bleibt als Lesehilfe stehen.
+        </Alert>
+      ) : null}
+
       {cardPreview ? (
         <div className={styles.cardPreview}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -350,6 +430,7 @@ export default function CapturePage({
               type="button"
               className={styles.inlineBtn}
               onClick={() => {
+                setOcr("idle");
                 setCardPreview((prev) => {
                   if (prev) URL.revokeObjectURL(prev);
                   return null;

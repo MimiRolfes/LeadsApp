@@ -4,7 +4,8 @@ import { defineConfig } from "vitest/config";
  * Monorepo-Testlauf. Backend-Suiten starten je eine eigene In-Memory-
  * Postgres-Instanz (PGlite/WASM) — deshalb laufen Testdateien sequentiell,
  * damit nicht viele WASM-Instanzen gleichzeitig um Ressourcen konkurrieren.
- * Frontend-Komponententests kommen in Phase 3 als eigenes Projekt hinzu.
+ * Vom Frontend werden bislang nur reine Hilfsfunktionen getestet (node,
+ * ohne DOM); Komponententests kämen als eigenes Projekt dazu.
  */
 export default defineConfig({
   test: {
@@ -26,6 +27,14 @@ export default defineConfig({
           root: "apps/backend",
           environment: "node",
           include: ["src/**/*.test.ts"],
+        },
+      },
+      {
+        test: {
+          name: "frontend",
+          root: "apps/frontend",
+          environment: "node",
+          include: ["src/lib/**/*.test.ts"],
         },
       },
     ],

@@ -44,7 +44,11 @@ self.addEventListener("fetch", (event) => {
 
   if (
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/icons/")
+    url.pathname.startsWith("/icons/") ||
+    // Texterkennung: Worker, Kern und Sprachmodelle. Nach dem ersten Laden
+    // liegen sie im Cache, damit das Scannen auf der Messe auch ohne Netz
+    // funktioniert.
+    url.pathname.startsWith("/ocr/")
   ) {
     event.respondWith(staleWhileRevalidate(request, ASSETS));
     return;

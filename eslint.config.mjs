@@ -23,6 +23,8 @@ const config = [
       "**/playwright-report/**",
       "**/next-env.d.ts",
       "apps/backend/src/db/migrations/**",
+      // Fremdcode: Tesseract-Worker/Kern, unverändert ausgeliefert.
+      "apps/frontend/public/ocr/**",
     ],
   },
   js.configs.recommended,

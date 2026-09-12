@@ -175,9 +175,12 @@ export const leadTags = pgTable(
 );
 
 /**
- * Datei-Anhänge (Visitenkarten-Fotos/Scans). Nur Metadaten in der DB; die
- * Datei liegt im Objektspeicher (Treiber per ENV). `scanStatus` steuert den
- * Zugriff (nur "clean" ausliefern).
+ * Datei-Anhänge zu einem Lead (Dokumente, z. B. Angebot oder Broschüre).
+ * Nur Metadaten in der DB; die Datei liegt im Objektspeicher (Treiber per
+ * ENV). `scanStatus` steuert den Zugriff (nur "clean" ausliefern).
+ *
+ * Visitenkartenfotos landen hier bewusst NICHT: sie werden auf dem Gerät
+ * ausgelesen und danach verworfen (Frontend, `src/lib/card-ocr.ts`).
  */
 export const attachments = pgTable(
   "attachments",
