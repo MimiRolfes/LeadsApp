@@ -371,7 +371,7 @@ a {
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --home-bg: #001540;
-  --home-veil: rgba(0, 21, 64, 0.74);
+    --home-veil: rgba(0, 21, 64, 0.74);
     --home-veil: rgba(0, 21, 64, 0.74);
     --home-panel: rgba(197, 205, 247, 0.2);
     --home-card: rgba(45, 123, 255, 0.25);
@@ -383,12 +383,12 @@ a {
     --home-menu-bg: #0b1444;
     --home-accent: #2d7bff;
     --home-accent-fg: #f3f4f8;
-  --home-field: #0b1444;
+    --home-field: #0b1444;
     --home-field-label: #c5cdf7;
     --home-field-fg: #c5cdf7;
     --home-action: rgba(197, 205, 247, 0.49);
     --home-action-fg: #0b1444;
-  --home-action-fg-mobile: #c5cdf7;
+    --home-action-fg-mobile: #c5cdf7;
     --home-rim: rgba(255, 255, 255, 0.26);
     --home-rim-top: rgba(255, 255, 255, 0.38);
     --home-glass-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.6);

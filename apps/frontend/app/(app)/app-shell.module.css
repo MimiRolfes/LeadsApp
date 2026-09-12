@@ -22,7 +22,9 @@
     linear-gradient(var(--home-veil), var(--home-veil)),
     url("/brand/home-bg.png");
   background-repeat: no-repeat, no-repeat;
-  background-size: 100% 100%, cover;
+  background-size:
+    100% 100%,
+    cover;
   background-position: center, center;
 
   /* Der Entwurf war insgesamt etwas zu groß geraten. Statt einzelne Werte
@@ -44,8 +46,12 @@
     background-image:
       linear-gradient(var(--home-veil), var(--home-veil)),
       url("/brand/home-bg-landscape.png");
-    background-size: 100% 100%, max(158.06vw, 222.23vh) auto;
-    background-position: center, 58.4% center;
+    background-size:
+      100% 100%,
+      max(158.06vw, 222.23vh) auto;
+    background-position:
+      center,
+      58.4% center;
   }
 }
 

@@ -15,7 +15,8 @@
 
 .panel {
   display: block;
-  padding: calc(1.5625 * var(--u)) calc(1.8125 * var(--u)) calc(2.1875 * var(--u));
+  padding: calc(1.5625 * var(--u)) calc(1.8125 * var(--u))
+    calc(2.1875 * var(--u));
   border-radius: calc(1.8125 * var(--u)); /* 29px (Handy) */
   /* Figma zeichnet das Handy-Panel 444px hoch, auch wenn dort nur Titel und
      Knopf stehen — die Mindesthöhe hält diese Proportion. */
@@ -33,7 +34,8 @@
 @media (min-width: 56rem) {
   .panel {
     min-height: 0;
-    padding: calc(2.3125 * var(--u)) calc(2.375 * var(--u)) calc(3.25 * var(--u)); /* 37 / 38 / 52px */
+    padding: calc(2.3125 * var(--u)) calc(2.375 * var(--u))
+      calc(3.25 * var(--u)); /* 37 / 38 / 52px */
     border-radius: calc(2.3125 * var(--u)); /* 37px */
   }
 }
@@ -47,7 +49,9 @@
 }
 @media (min-width: 56rem) {
   .head {
-    margin-bottom: calc(2.1875 * var(--u)); /* 35px (Button endet 103, Zeile 138) */
+    margin-bottom: calc(
+      2.1875 * var(--u)
+    ); /* 35px (Button endet 103, Zeile 138) */
   }
 }
 

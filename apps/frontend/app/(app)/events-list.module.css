@@ -11,11 +11,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: calc(2.9375 * var(--u)); /* 47px (Zeile endet 123, Karte 170) */
+  margin-bottom: calc(
+    2.9375 * var(--u)
+  ); /* 47px (Zeile endet 123, Karte 170) */
 }
 @media (min-width: 56rem) {
   .head {
-    margin-bottom: calc(4.25 * var(--u)); /* 68px (Zeile endet 292, Karte 360) */
+    margin-bottom: calc(
+      4.25 * var(--u)
+    ); /* 68px (Zeile endet 292, Karte 360) */
   }
 }
 
@@ -112,7 +116,8 @@
   .card {
     display: flex;
     align-items: flex-start;
-    padding: calc(0.9375 * var(--u)) 0 calc(3.375 * var(--u)) calc(1.4375 * var(--u)); /* 15 / 0 / 54 / 23px */
+    padding: calc(0.9375 * var(--u)) 0 calc(3.375 * var(--u))
+      calc(1.4375 * var(--u)); /* 15 / 0 / 54 / 23px */
   }
 }
 
@@ -182,7 +187,9 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: calc(23.125 * var(--u)); /* 370px */
-    margin-top: calc(1.0625 * var(--u)); /* Gruppe beginnt bei 32px, Karte 15px */
+    margin-top: calc(
+      1.0625 * var(--u)
+    ); /* Gruppe beginnt bei 32px, Karte 15px */
     margin-left: auto;
     margin-right: calc(7.3125 * var(--u)); /* 117px — Gruppe endet bei 981 */
     text-align: center;

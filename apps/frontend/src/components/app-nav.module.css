@@ -109,7 +109,9 @@
     display: block;
     width: calc(16.5 * var(--u)); /* 264px */
     height: calc(2.8125 * var(--u)); /* 45px */
-    margin-left: calc(6.9375 * var(--u)); /* 111px — Wortmarke beginnt bei 417 */
+    margin-left: calc(
+      6.9375 * var(--u)
+    ); /* 111px — Wortmarke beginnt bei 417 */
   }
   /* Helle Wortmarke auf dunklem Grund, dunkle auf hellem. */
   .wordmarkDark {
