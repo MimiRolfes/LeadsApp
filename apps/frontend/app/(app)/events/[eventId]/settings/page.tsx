@@ -4,6 +4,7 @@ import { use, useEffect, useState } from "react";
 import { EVENT_STATUSES } from "@humatter-leads/shared";
 import { ApiError, apiGet, apiPatch } from "@/lib/api";
 import type { EventDto } from "@/lib/types";
+import { DeleteEvent } from "@/components/delete-event";
 import {
   Alert,
   Button,
@@ -134,6 +135,7 @@ export default function EventSettingsPage({
           </Button>
         </form>
       </Card>
+      <DeleteEvent eventId={eventId} eventName={ev.name} />
     </>
   );
 }

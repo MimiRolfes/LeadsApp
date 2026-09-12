@@ -108,6 +108,34 @@
   }
 }
 
+/* --- Registrieren -----------------------------------------------------
+   Gleiche Bausteine wie Login, aber eigene Abstände (Figma 57:339 Handy /
+   57:318 Desktop). Die Karte liegt im gemeinsamen Layout, deshalb greift
+   die Seite über :has() auf sie zu, statt die Shell zu duplizieren. */
+.panel:has(.register) {
+  padding: 2.875rem 1.6875rem 2.6875rem; /* 46 / 27 / 43px */
+}
+.panel:has(.register) .logo {
+  margin-bottom: 3.75rem; /* 60px (Logo endet 73, Feld beginnt 133) */
+}
+.panel:has(.register) .foot {
+  margin: 0.625rem 0 1.875rem; /* 10 / 30px */
+}
+@media (min-width: 56rem) {
+  .panel:has(.register) {
+    padding: 5.0625rem 3.1875rem 4.1875rem; /* 81 / 51 / 67px */
+  }
+  .panel:has(.register) .logo {
+    margin-bottom: 4.25rem; /* 68px */
+  }
+  .panel:has(.register) .field + .field {
+    margin-top: 3.0625rem; /* 49px */
+  }
+  .panel:has(.register) .foot {
+    margin: 0.75rem 0 3.0625rem; /* 12 / 49px */
+  }
+}
+
 .srOnly {
   position: absolute;
   width: 1px;

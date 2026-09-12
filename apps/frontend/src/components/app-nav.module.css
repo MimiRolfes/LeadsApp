@@ -1,0 +1,220 @@
+/*
+ * Navigationspille aus Figma "Messe" (Home dark/light, Desktop 50:60/50:57,
+ * Handy 35:34/35:32).
+ *
+ * Alle Maße stehen als Vielfache von `--u` (siehe app-shell.module.css):
+ * `calc(6 * var(--u))` = 96px × Skalierungsfaktor. Der Entwurf ist damit
+ * unverändert — nur gleichmäßig etwas kleiner.
+ *
+ * Glas: Figmas Glass-Effekt fehlt im Code-Export. Der Blur ist numerisch
+ * gegen das gerenderte Frame ermittelt (klares Minimum bei 16–18px, für
+ * Leiste und Karte derselbe Wert) — dieselbe Behandlung wie die
+ * Login-Karte.
+ */
+
+.nav {
+  position: fixed;
+  z-index: 30;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(4 * var(--u)); /* 64px */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: min(calc(21.125 * var(--u)), 100% - 2.75rem); /* 338px */
+  height: calc(4.125 * var(--u)); /* 66px */
+  padding: 0 calc(1.5 * var(--u)) 0 calc(1.1875 * var(--u)); /* 24 / 19px */
+  border-radius: calc(1.8125 * var(--u)); /* 29px */
+  /* Glas-Rezept, aus dem Figma-Rendering gemessen: Füllung + Verlauf,
+     weicher Blur mit Sättigung, 1px heller Rand und oben eine hellere
+     Lichtkante — der Rand ist das, was die Fläche als Glas lesbar macht. */
+  background-color: var(--home-panel);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  color: var(--home-fg);
+}
+
+/* Auf dem Handy sollen alle fünf Icons gleichmäßig verteilt sein — die
+   Gruppierung für den Desktop wird dafür aufgelöst. */
+.group {
+  display: contents;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+.item:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.item:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 4px;
+  border-radius: 0.5rem;
+}
+
+.icon {
+  width: calc(1.875 * var(--u)); /* 30px */
+  height: calc(1.875 * var(--u));
+}
+
+.wordmark {
+  display: none;
+}
+
+@media (min-width: 56rem) {
+  .nav {
+    /* relative statt static: sonst greift z-index nicht, und weil die Leiste
+       durch backdrop-filter einen eigenen Stacking-Kontext bildet, läge das
+       Konto-Menü darin gefangen hinter dem Seiteninhalt.
+       Die Versatzwerte der Handy-Variante müssen dabei zurückgesetzt werden —
+       bei `relative` würden sie sonst greifen. */
+    position: relative;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    justify-content: flex-start;
+    width: calc(68.625 * var(--u)); /* 1098px */
+    max-width: 100%;
+    height: calc(6 * var(--u)); /* 96px */
+    margin: 0 auto;
+    padding: 0 calc(4.1875 * var(--u)) 0 calc(2.5 * var(--u)); /* 67 / 40px */
+  }
+  .group {
+    display: flex;
+    align-items: center;
+    gap: calc(3.625 * var(--u)); /* 58px (Icons bei 40/148/256) */
+  }
+  .group:last-of-type {
+    gap: calc(7.8125 * var(--u)); /* 125px (Icons bei 806/981) */
+    margin-left: calc(7.8125 * var(--u));
+  }
+  .icon {
+    width: calc(3.125 * var(--u)); /* 50px */
+    height: calc(3.125 * var(--u));
+  }
+  .wordmark {
+    display: block;
+    width: calc(16.5 * var(--u)); /* 264px */
+    height: calc(2.8125 * var(--u)); /* 45px */
+    margin-left: calc(6.9375 * var(--u)); /* 111px — Wortmarke beginnt bei 417 */
+  }
+  /* Helle Wortmarke auf dunklem Grund, dunkle auf hellem. */
+  .wordmarkDark {
+    display: none;
+  }
+  :root[data-theme="dark"] .wordmarkLight {
+    display: none;
+  }
+  :root[data-theme="dark"] .wordmarkDark {
+    display: block;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .wordmarkLight {
+      display: none;
+    }
+    :root:not([data-theme="light"]) .wordmarkDark {
+      display: block;
+    }
+  }
+}
+
+/* --- Konto-/Darstellungsmenü (nicht in Figma entworfen) --------------- */
+.accountWrap {
+  position: relative;
+  display: flex;
+}
+
+.menu {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.75rem);
+  z-index: 30;
+  width: 15rem;
+  padding: 1rem;
+  border-radius: 1.25rem;
+  background: var(--home-menu-bg);
+  color: var(--home-fg);
+  box-shadow: 0 18px 40px -12px rgba(0, 0, 0, 0.45);
+}
+@media (min-width: 56rem) {
+  .menu {
+    top: calc(100% + 0.75rem);
+    bottom: auto;
+  }
+}
+
+.menuName {
+  margin: 0;
+  font-family: var(--font-brand-sans);
+  font-size: 1rem;
+}
+.menuMail {
+  margin: 0.125rem 0 1rem;
+  font-family: var(--font-brand-sans);
+  font-weight: 300;
+  font-size: 0.8125rem;
+  opacity: 0.8;
+  overflow-wrap: anywhere;
+}
+
+.menuLabel {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-brand-sans);
+  font-weight: 300;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.8;
+}
+
+.themeRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.375rem;
+  margin-bottom: 1rem;
+}
+
+.themeButton {
+  padding: 0.5rem 0.25rem;
+  border: 1px solid currentColor;
+  border-radius: 0.75rem;
+  background: none;
+  color: inherit;
+  font-family: var(--font-brand-sans);
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+.themeButton[aria-pressed="true"] {
+  background: var(--home-accent);
+  border-color: var(--home-accent);
+  color: var(--home-accent-fg);
+}
+
+.logout {
+  width: 100%;
+  padding: 0.625rem;
+  border: 0;
+  border-radius: 0.75rem;
+  background: var(--home-accent);
+  color: var(--home-accent-fg);
+  font-family: var(--font-brand-sans);
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+.logout:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

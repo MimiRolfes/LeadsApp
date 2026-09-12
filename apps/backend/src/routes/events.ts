@@ -36,6 +36,7 @@ import {
   archiveQuestion,
   createEvent,
   createQuestion,
+  deleteEventCompletely,
   getEvent,
   listEventsForUser,
   listMembers,
@@ -110,6 +111,22 @@ eventsRoutes.patch(
     return c.json({ event });
   },
 );
+
+/**
+ * Löscht ein Event samt aller daran hängenden Daten — unumkehrbar.
+ * Nur Event-Manager (und Admins) dürfen das; der Vorgang wird auditiert.
+ */
+eventsRoutes.delete("/:eventId", async (c) => {
+  const eventId = c.req.param("eventId");
+  assertCanManageEvent(c.get("authz")!, eventId);
+  const result = await deleteEventCompletely(
+    c.get("db"),
+    c.get("user")!.id,
+    eventId,
+    clientIp(c),
+  );
+  return c.json(result);
+});
 
 // --- Team ----------------------------------------------------------
 

@@ -66,10 +66,6 @@ export async function all(): Promise<OutboxItem[]> {
   });
 }
 
-export async function pendingCount(): Promise<number> {
-  return (await all()).filter((i) => i.status !== "synced").length;
-}
-
 async function update(item: OutboxItem): Promise<void> {
   await tx("readwrite", (s) => s.put(item));
   notify();

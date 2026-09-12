@@ -7,10 +7,18 @@ import type {
   QuestionUpdate,
 } from "@humatter-leads/shared";
 import type { Db } from "../db/types";
-import { eventMembers, events, questions, users } from "../db/schema";
+import {
+  attachments,
+  eventMembers,
+  events,
+  leads,
+  questions,
+  users,
+} from "../db/schema";
 import type { AuthCtx } from "../authz";
 import { errors } from "../lib/errors";
 import { audit } from "./audit";
+import { deleteObject } from "../lib/storage";
 
 export type EventRow = typeof events.$inferSelect;
 export type QuestionRow = typeof questions.$inferSelect;
@@ -283,4 +291,65 @@ export async function archiveQuestion(
     entityId: questionId,
     eventId,
   });
+}
+
+/**
+ * Löscht ein Event mit ALLEN daran hängenden Daten.
+ *
+ * Die Tabellen (Leads, Antworten, Anhänge, Mitglieder, Fragen, Follow-ups)
+ * hängen per `onDelete: cascade` am Event und verschwinden mit der einen
+ * Zeile. Was die Datenbank NICHT mitnimmt, sind die abgelegten Dateien —
+ * die werden deshalb vorher einzeln aus dem Speicher entfernt.
+ *
+ * Bewusst unumkehrbar: der Zweck ist die vollständige Entfernung der
+ * Personendaten eines Events. Der Audit-Eintrag wird VOR dem Löschen
+ * geschrieben (danach wäre die event_id nicht mehr referenzierbar) und
+ * hält nur Zählwerte fest, keine Inhalte.
+ */
+export async function deleteEventCompletely(
+  db: Db,
+  actorId: string,
+  eventId: string,
+  ip?: string | null,
+): Promise<{ deletedLeads: number; deletedAttachments: number }> {
+  const attachmentRows = await db
+    .select({ storageKey: attachments.storageKey })
+    .from(attachments)
+    .innerJoin(leads, eq(leads.id, attachments.leadId))
+    .where(eq(leads.eventId, eventId));
+
+  const leadRows = await db
+    .select({ id: leads.id })
+    .from(leads)
+    .where(eq(leads.eventId, eventId));
+
+  await audit(db, {
+    actorId,
+    action: "event.delete",
+    entityType: "event",
+    entityId: eventId,
+    eventId,
+    ip: ip ?? null,
+    metadata: {
+      leads: leadRows.length,
+      attachments: attachmentRows.length,
+    },
+  });
+
+  // Erst die Dateien: bleibt eine liegen, brechen wir ab und das Event
+  // existiert noch — besser als verwaiste Dateien mit Personendaten.
+  for (const row of attachmentRows) {
+    await deleteObject(row.storageKey);
+  }
+
+  const [deleted] = await db
+    .delete(events)
+    .where(eq(events.id, eventId))
+    .returning({ id: events.id });
+  if (!deleted) throw errors.notFound("event_not_found");
+
+  return {
+    deletedLeads: leadRows.length,
+    deletedAttachments: attachmentRows.length,
+  };
 }

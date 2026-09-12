@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Inria_Serif } from "next/font/google";
+import { Inter, Inria_Sans, Inria_Serif } from "next/font/google";
 import { APP_NAME } from "@humatter-leads/shared";
 import { ServiceWorkerRegister } from "@/components/service-worker";
 import "./globals.css";
@@ -24,6 +24,15 @@ const inriaSerif = Inria_Serif({
   weight: ["400", "700"],
   display: "swap",
   variable: "--font-inria-serif",
+});
+
+// Die Event-Karten der Home-Screens setzen in Figma auf Inria Sans (Light +
+// Regular), nicht auf die Serif-Variante.
+const inriaSans = Inria_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "700"],
+  display: "swap",
+  variable: "--font-inria-sans",
 });
 
 export const metadata: Metadata = {
@@ -62,7 +71,7 @@ export default function RootLayout({
   return (
     <html
       lang="de"
-      className={`${inter.variable} ${inriaSerif.variable}`}
+      className={`${inter.variable} ${inriaSerif.variable} ${inriaSans.variable}`}
       // Das Inline-Skript setzt data-theme vor der Hydration — erwarteter
       // Server/Client-Unterschied genau auf diesem Element.
       suppressHydrationWarning

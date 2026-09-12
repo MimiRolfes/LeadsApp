@@ -1,0 +1,41 @@
+/*
+ * Icons als Masken statt als Bilder: die SVG-Datei liefert nur die Form,
+ * die Farbe kommt über `currentColor`. Damit bleiben es echte Assets
+ * (public/icons/nav/*.svg, 1:1 aus Figma exportiert) und sie folgen
+ * trotzdem dem Hell/Dunkel-Modus.
+ */
+.icon {
+  display: block;
+  background-color: currentColor;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+.today {
+  mask-image: url("/icons/nav/today.svg");
+  -webkit-mask-image: url("/icons/nav/today.svg");
+}
+.groups {
+  mask-image: url("/icons/nav/groups.svg");
+  -webkit-mask-image: url("/icons/nav/groups.svg");
+}
+.mail {
+  mask-image: url("/icons/nav/mail.svg");
+  -webkit-mask-image: url("/icons/nav/mail.svg");
+}
+.checkBox {
+  mask-image: url("/icons/nav/check_box.svg");
+  -webkit-mask-image: url("/icons/nav/check_box.svg");
+}
+.accountCircle {
+  mask-image: url("/icons/nav/account_circle.svg");
+  -webkit-mask-image: url("/icons/nav/account_circle.svg");
+}
+.add {
+  mask-image: url("/icons/nav/add.svg");
+  -webkit-mask-image: url("/icons/nav/add.svg");
+}

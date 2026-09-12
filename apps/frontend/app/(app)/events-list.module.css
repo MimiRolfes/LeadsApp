@@ -1,69 +1,225 @@
-.section {
-  margin-bottom: var(--space-8);
+/*
+ * Home / Event-Liste nach Figma "Messe"
+ * (Desktop 50:57 hell / 50:60 dunkel, Handy 35:32 hell / 35:34 dunkel).
+ *
+ * Maße als Vielfache von `--u` (siehe app-shell.module.css):
+ * `calc(2.25 * var(--u))` = 36px × Skalierungsfaktor.
+ */
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: calc(2.9375 * var(--u)); /* 47px (Zeile endet 123, Karte 170) */
 }
-.sectionTitle {
-  font-family: var(--font-ui);
-  font-size: var(--text-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin: 0 0 var(--space-3);
+@media (min-width: 56rem) {
+  .head {
+    margin-bottom: calc(4.25 * var(--u)); /* 68px (Zeile endet 292, Karte 360) */
+  }
 }
-.grid {
-  list-style: none;
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(2.25 * var(--u)); /* 36px */
+  line-height: 1.2;
+  color: var(--home-fg);
+}
+@media (min-width: 56rem) {
+  .title {
+    font-size: calc(2.5 * var(--u)); /* 40px */
+  }
+}
+
+/* Handy: nur das Plus in einer 63×60-Pille. Desktop: "Neues Event" + Plus. */
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: calc(0.5 * var(--u));
+  width: calc(3.9375 * var(--u)); /* 63px */
+  height: calc(3.75 * var(--u)); /* 60px */
+  border-radius: calc(1.8125 * var(--u)); /* 29px */
+  background-color: var(--home-panel);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  color: var(--home-fg);
+  text-decoration: none;
+}
+@media (min-width: 56rem) {
+  .cta {
+    width: calc(18.6875 * var(--u)); /* 299px */
+    height: calc(4.6875 * var(--u)); /* 75px */
+    gap: calc(0.75 * var(--u));
+  }
+}
+
+.ctaLabel {
+  display: none;
+  font-family: var(--font-display);
+  font-weight: var(--home-cta-weight);
+  font-size: calc(1.75 * var(--u)); /* 28px */
+}
+@media (min-width: 56rem) {
+  .ctaLabel {
+    display: inline;
+  }
+}
+
+.ctaIcon {
+  width: calc(1.875 * var(--u)); /* 30px */
+  height: calc(1.875 * var(--u));
+}
+@media (min-width: 56rem) {
+  .ctaIcon {
+    width: calc(2.625 * var(--u)); /* 42px */
+    height: calc(2.625 * var(--u));
+  }
+}
+
+.list {
+  display: grid;
+  gap: 1rem;
   margin: 0;
   padding: 0;
-  display: grid;
-  gap: var(--space-3);
-  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  list-style: none;
 }
+
 .card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-6);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow), var(--glass-highlight);
+  display: block;
+  padding: calc(0.9375 * var(--u)) calc(1.125 * var(--u)) calc(2.125 * var(--u)); /* 15 / 18 / 34px */
+  border-radius: calc(1.8125 * var(--u)); /* 29px */
+  background-color: var(--home-card);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  color: var(--home-card-title);
   text-decoration: none;
-  color: var(--color-text);
-  transition:
-    border-color 0.16s var(--ease-glass),
-    transform 0.16s var(--ease-glass),
-    box-shadow 0.16s var(--ease-glass);
 }
-.card:hover {
-  border-color: color-mix(
-    in srgb,
-    var(--color-accent) 55%,
-    var(--glass-border)
-  );
-  transform: translateY(-2px);
+@media (min-width: 56rem) {
+  .card {
+    display: flex;
+    align-items: flex-start;
+    padding: calc(0.9375 * var(--u)) 0 calc(3.375 * var(--u)) calc(1.4375 * var(--u)); /* 15 / 0 / 54 / 23px */
+  }
 }
-.card:active {
-  transform: translateY(0);
+
+.cardMain {
+  min-width: 0;
 }
+@media (min-width: 56rem) {
+  .cardMain {
+    flex: 1;
+  }
+}
+
 .name {
-  font-weight: 600;
-  color: var(--color-heading);
+  display: block;
+  margin: 0;
+  font-family: var(--font-brand-sans);
+  font-weight: 400;
+  font-size: calc(1.25 * var(--u)); /* 20px */
+  line-height: calc(2.4375 * var(--u)); /* 39px laut Figma-Textbox */
+  color: var(--home-card-title);
 }
-.meta {
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
+@media (min-width: 56rem) {
+  .name {
+    font-size: calc(2 * var(--u)); /* 32px */
+    line-height: calc(3.625 * var(--u)); /* 58px */
+  }
 }
-.badge {
-  align-self: flex-start;
-  margin-top: var(--space-2);
-  font-size: var(--text-xs);
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  background: var(--neutral-100);
-  color: var(--neutral-700);
+
+.dates,
+.place {
+  display: block;
+  margin: 0;
+  font-family: var(--font-brand-sans);
+  font-weight: 300; /* Inria Sans Light */
+  font-size: calc(0.9375 * var(--u)); /* 15px */
+  color: var(--home-card-muted);
 }
-.badge[data-status="active"] {
-  background: color-mix(in srgb, var(--status-success) 15%, transparent);
-  color: var(--status-success);
+.dates {
+  margin-top: calc(0.3125 * var(--u)); /* 5px */
+  line-height: calc(1.75 * var(--u)); /* 28px */
+}
+.place {
+  margin-top: calc(0.5 * var(--u)); /* 8px */
+  line-height: calc(1.0625 * var(--u)); /* 17px */
+}
+@media (min-width: 56rem) {
+  .dates,
+  .place {
+    font-size: calc(1.25 * var(--u)); /* 20px */
+  }
+  .dates {
+    margin-top: 0;
+    line-height: calc(2.875 * var(--u)); /* 46px */
+  }
+  .place {
+    margin-top: 0;
+    line-height: calc(1.5625 * var(--u)); /* 25px */
+  }
+}
+
+/* Kennzahlen gibt es im Entwurf nur auf dem Desktop. */
+.stats {
+  display: none;
+}
+@media (min-width: 56rem) {
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    width: calc(23.125 * var(--u)); /* 370px */
+    margin-top: calc(1.0625 * var(--u)); /* Gruppe beginnt bei 32px, Karte 15px */
+    margin-left: auto;
+    margin-right: calc(7.3125 * var(--u)); /* 117px — Gruppe endet bei 981 */
+    text-align: center;
+  }
+}
+
+.statValue {
+  display: block;
+  font-family: var(--font-brand-sans);
+  font-weight: 400;
+  font-size: calc(2 * var(--u)); /* 32px */
+  line-height: calc(3.625 * var(--u)); /* 58px */
+  color: var(--home-stat);
+}
+
+.statLabel {
+  display: block;
+  font-family: var(--font-brand-sans);
+  font-weight: 300;
+  font-size: calc(1.25 * var(--u)); /* 20px */
+  line-height: calc(1.5625 * var(--u)); /* 25px */
+  color: var(--home-card-muted);
+}
+
+.empty {
+  margin: 0;
+  padding: 1.5rem calc(1.125 * var(--u));
+  border-radius: calc(1.8125 * var(--u));
+  background-color: var(--home-card);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  color: var(--home-card-title);
+  font-family: var(--font-brand-sans);
+  font-size: 1.0625rem;
 }

@@ -60,7 +60,7 @@ export async function getLeadRef(
   return { id: row.id, eventId: row.eventId, ownerId: row.ownerId };
 }
 
-export async function findDuplicates(
+async function findDuplicates(
   db: Db,
   eventId: string,
   email: string,

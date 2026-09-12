@@ -45,7 +45,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <form onSubmit={submit} noValidate>
+    <form onSubmit={submit} noValidate className={styles.register}>
       <h1 className={styles.srOnly}>Konto anlegen</h1>
       {error ? <AuthMessage kind="error">{error}</AuthMessage> : null}
       <AuthField
@@ -78,7 +78,7 @@ export default function RegisterPage() {
         error={fieldErrors.password?.[0]}
       />
       <div className={styles.foot}>
-        <span>Mindestens 6 Zeichen und eine Ziffer</span>
+        <span>Mindestens 6 Zeichen und 1 Ziffer</span>
         <Link href="/login">Anmelden</Link>
       </div>
       <button type="submit" className={styles.submit} disabled={busy}>

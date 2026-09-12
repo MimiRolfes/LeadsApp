@@ -5,13 +5,6 @@
 export type AllowedMime =
   "image/jpeg" | "image/png" | "image/webp" | "application/pdf";
 
-export const ALLOWED_MIME: AllowedMime[] = [
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "application/pdf",
-];
-
 const EXT: Record<AllowedMime, string> = {
   "image/jpeg": "jpg",
   "image/png": "png",

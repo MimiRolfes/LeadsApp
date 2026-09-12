@@ -1,12 +1,18 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { requireSession } from "@/lib/session";
-import { AccountMenu } from "@/components/account-menu";
-import { SyncStatus } from "@/components/sync-status";
+import { AppNav } from "@/components/app-nav";
 import { HeaderBack } from "@/components/header-back";
+import { SyncStatus } from "@/components/sync-status";
 import styles from "./app-shell.module.css";
 
-export default async function AppLayout({ children }: { children: ReactNode }) {
+export default async function AppLayout({
+  children,
+  modal,
+}: {
+  children: ReactNode;
+  /** Paralleler Slot für Overlays (z. B. "Neues Event") über dem Inhalt. */
+  modal: ReactNode;
+}) {
   const { user } = await requireSession();
 
   return (
@@ -14,22 +20,27 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       <a href="#main" className={styles.skip}>
         Zum Inhalt springen
       </a>
-      <header className={styles.topbar}>
-        <div className={styles.brandArea}>
-          <HeaderBack />
-          <Link href="/" className={styles.logo}>
-            <span className={styles.logoPrefix}>humatter </span>
-            <span>Leads</span>
-          </Link>
-        </div>
-        <div className={styles.userArea}>
-          <SyncStatus />
-          <AccountMenu name={user.displayName} email={user.email} />
-        </div>
-      </header>
+      <AppNav name={user.displayName} email={user.email} />
+
       <main id="main" className={styles.content}>
+        {/* Rendert auf "/" nichts — nur Unterseiten bekommen "Zurück". */}
+        <HeaderBack />
         {children}
       </main>
+
+      {modal}
+
+      <div className={styles.sync}>
+        <SyncStatus />
+      </div>
+
+      {/* eslint-disable-next-line @next/next/no-img-element -- statisches Deko-Icon */}
+      <img
+        src="/brand/humatter-mascot.png"
+        alt=""
+        aria-hidden="true"
+        className={styles.mascot}
+      />
     </div>
   );
 }

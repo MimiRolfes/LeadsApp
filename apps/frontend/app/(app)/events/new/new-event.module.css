@@ -1,0 +1,264 @@
+/*
+ * "Neues Event" nach Figma "Messe"
+ * (Desktop 57:480 hell / 57:505 dunkel, Handy 57:520).
+ *
+ * Das Panel ist dieselbe Glasfläche wie die Event-Karte auf der Startseite
+ * (gleiche Füllung `--home-card`, gleiches Rezept aus Rand, Verlauf, Blur
+ * und Schatten) — nur der Radius ist größer. Maße als Vielfache von `--u`
+ * (siehe app-shell.module.css).
+ *
+ * HINWEIS: Im Handy-Frame sind nur Titel und Button gezeichnet, die
+ * Feldzeilen fehlen im Entwurf. Ihre Handy-Maße sind deshalb aus dem
+ * Desktop-Frame im selben Verhältnis abgeleitet, das der Entwurf auch bei
+ * Login/Registrieren zwischen den Breakpoints verwendet (≈ 0,67).
+ */
+
+.panel {
+  display: block;
+  padding: calc(1.5625 * var(--u)) calc(1.8125 * var(--u)) calc(2.1875 * var(--u));
+  border-radius: calc(1.8125 * var(--u)); /* 29px (Handy) */
+  /* Figma zeichnet das Handy-Panel 444px hoch, auch wenn dort nur Titel und
+     Knopf stehen — die Mindesthöhe hält diese Proportion. */
+  min-height: calc(27.75 * var(--u)); /* 444px */
+  background-color: var(--home-card);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  color: var(--home-card-title);
+}
+@media (min-width: 56rem) {
+  .panel {
+    min-height: 0;
+    padding: calc(2.3125 * var(--u)) calc(2.375 * var(--u)) calc(3.25 * var(--u)); /* 37 / 38 / 52px */
+    border-radius: calc(2.3125 * var(--u)); /* 37px */
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: calc(2.5 * var(--u)); /* 40px (Handy, abgeleitet) */
+}
+@media (min-width: 56rem) {
+  .head {
+    margin-bottom: calc(2.1875 * var(--u)); /* 35px (Button endet 103, Zeile 138) */
+  }
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: calc(1.5 * var(--u)); /* 24px */
+  line-height: calc(2.625 * var(--u)); /* 42px */
+  color: var(--home-card-title);
+}
+@media (min-width: 56rem) {
+  .title {
+    font-size: calc(2 * var(--u)); /* 32px */
+  }
+}
+
+/* Handy: nur das Plus in einer 63×60-Pille — wie die Kachel auf der
+   Startseite. Desktop: "Anlegen" + Plus. */
+.action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  gap: calc(0.5 * var(--u));
+  width: calc(3.9375 * var(--u)); /* 63px */
+  height: calc(3.75 * var(--u)); /* 60px */
+  border: 0;
+  border-radius: calc(1.8125 * var(--u)); /* 29px */
+  /* Auch der Knopf ist Glas — gleiches Rezept wie Panel und Karte, nur mit
+     der eigenen Füllung aus dem Entwurf. */
+  background-color: var(--home-action);
+  background-image: var(--home-sheen);
+  -webkit-backdrop-filter: var(--home-glass);
+  backdrop-filter: var(--home-glass);
+  box-shadow:
+    inset 0 0 0 1px var(--home-rim),
+    inset 0 1px 0 var(--home-rim-top),
+    var(--home-glass-shadow);
+  /* Auf dem Handy ist das Plus im Entwurf hell (gemessen: #c6d5f5), auf
+     dem Desktop stehen Text und Plus dunkel auf der helleren Fläche. */
+  color: var(--home-action-fg-mobile);
+  cursor: pointer;
+}
+@media (min-width: 56rem) {
+  .action {
+    color: var(--home-action-fg);
+  }
+}
+.action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@media (min-width: 56rem) {
+  .action {
+    width: calc(16.5625 * var(--u)); /* 265px */
+    height: calc(4.125 * var(--u)); /* 66px */
+    gap: calc(0.75 * var(--u));
+  }
+}
+
+.actionLabel {
+  display: none;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: calc(1.75 * var(--u)); /* 28px */
+}
+@media (min-width: 56rem) {
+  .actionLabel {
+    display: inline;
+  }
+}
+
+.actionIcon {
+  width: calc(1.875 * var(--u)); /* 30px */
+  height: calc(1.875 * var(--u));
+}
+@media (min-width: 56rem) {
+  .actionIcon {
+    width: calc(2.625 * var(--u)); /* 42px */
+    height: calc(2.625 * var(--u));
+  }
+}
+
+/* --- Feldzeilen ------------------------------------------------------
+   Deckende Zeile mit Beschriftung links; die Eingabe läuft in derselben
+   Zeile weiter. Im Entwurf steht dort nur das Wort — als echtes Formular
+   braucht es die Eingabe daneben. */
+.row {
+  display: flex;
+  align-items: center;
+  gap: calc(0.75 * var(--u));
+  min-height: calc(2.625 * var(--u)); /* 42px (Handy, abgeleitet) */
+  padding: 0 var(--u);
+  border-radius: calc(0.75 * var(--u)); /* 12px */
+  background: var(--home-field);
+}
+.row + .row {
+  margin-top: calc(1.0625 * var(--u)); /* 17px (Handy, abgeleitet) */
+}
+@media (min-width: 56rem) {
+  .row {
+    min-height: calc(3.875 * var(--u)); /* 62px */
+  }
+  .row + .row {
+    margin-top: calc(1.5625 * var(--u)); /* 25px */
+  }
+}
+
+.label {
+  flex: none;
+  font-family: var(--font-brand-sans);
+  font-weight: 700; /* Inria Sans Bold */
+  font-size: var(--u); /* 16px (Handy, abgeleitet) */
+  color: var(--home-field-label);
+}
+@media (min-width: 56rem) {
+  .label {
+    font-size: calc(1.5 * var(--u)); /* 24px */
+  }
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  color: var(--home-field-fg);
+  font-family: var(--font-brand-sans);
+  font-size: var(--u);
+  text-align: right;
+}
+@media (min-width: 56rem) {
+  .input {
+    font-size: calc(1.5 * var(--u));
+  }
+}
+.input:focus-visible {
+  outline: 2px solid var(--home-field-fg);
+  outline-offset: 4px;
+  border-radius: 0.25rem;
+}
+/* Der native Kalender-Knopf der Datumsfelder folgt der Textfarbe. */
+.input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+:root[data-theme="dark"] .input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+}
+
+.message {
+  margin: 0 0 var(--u);
+  padding: calc(0.625 * var(--u)) var(--u);
+  border-radius: calc(0.75 * var(--u));
+  background: rgba(192, 38, 38, 0.16);
+  color: #7a1c1c;
+  font-family: var(--font-brand-sans);
+  font-size: var(--u);
+}
+:root[data-theme="dark"] .message {
+  background: rgba(255, 138, 138, 0.18);
+  color: #ffd9d9;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .message {
+    background: rgba(255, 138, 138, 0.18);
+    color: #ffd9d9;
+  }
+}
+
+.fieldError {
+  display: block;
+  margin: calc(0.25 * var(--u)) 0 0 var(--u);
+  font-family: var(--font-brand-sans);
+  font-size: calc(0.8125 * var(--u));
+  color: var(--home-card-title);
+}
+
+/* --- Overlay ---------------------------------------------------------
+   "Neues Event" öffnet sich über der Übersicht: der Hintergrund wird
+   unscharf und leicht abgedunkelt, das Panel liegt darüber. Auf dem Handy
+   sitzt es oben (wie im Entwurf, Panel bei y=150), auf dem Desktop
+   ebenfalls im oberen Drittel (Panel bei y=203). */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: calc(5.5 * var(--u)) calc(1.6875 * var(--u)) calc(2 * var(--u));
+  overflow-y: auto;
+  background: var(--home-scrim);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+@media (min-width: 56rem) {
+  .overlay {
+    padding: calc(9 * var(--u)) 0 calc(4 * var(--u));
+  }
+}
+
+.dialog {
+  width: min(calc(68.625 * var(--u)), 100%);
+}
+.dialog:focus {
+  outline: none;
+}

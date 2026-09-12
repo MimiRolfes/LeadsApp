@@ -1,78 +1,104 @@
+/*
+ * App-Hülle nach Figma "Messe" (Home dark/light, Desktop 50:60/50:57,
+ * Handy 35:34/35:32): Vollton-Fläche, darüber ein Hintergrundbild bei 26 %
+ * Deckkraft, darauf die schwebende Navigationspille und das Maskottchen
+ * unten links. Farben kommen aus den --home-*-Tokens in globals.css.
+ */
+
 .shell {
+  position: relative;
   min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
+  color: var(--home-fg);
+  isolation: isolate;
+
+  /* Flächenfarbe, darüber das Bild mit 26 % — genau wie im Entwurf.
+     Umgesetzt als Schleier in Flächenfarbe bei 74 % ÜBER dem Bild, was
+     rechnerisch dasselbe ergibt und ohne zusätzliche Ebene auskommt.
+     Vorher lag das Bild in einem eigenen `position: fixed`-Element; auf
+     dem Handy skalierte das beim Scrollen mit der ein- und ausfahrenden
+     Browserleiste und fiel als wandernder Layer auf. */
+  background-color: var(--home-bg);
+  background-image:
+    linear-gradient(var(--home-veil), var(--home-veil)),
+    url("/brand/home-bg.png");
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 100%, cover;
+  background-position: center, center;
+
+  /* Der Entwurf war insgesamt etwas zu groß geraten. Statt einzelne Werte
+     zu verändern (was die Proportionen verschöbe) skaliert EIN Faktor die
+     ganze Komposition. Alle Maße stehen deshalb als `calc(N * var(--u))`,
+     wobei N der Figma-Wert in rem ist. Zum Nachjustieren nur die beiden
+     Faktoren hier ändern. */
+  --home-scale: 0.9;
+  --u: calc(1rem * var(--home-scale));
 }
+@media (min-width: 56rem) {
+  .shell {
+    --home-scale: 0.85;
+    padding-top: calc(3.3125 * var(--u)); /* 53px — Oberkante der Leiste */
+    /* Auf dem Desktop liegt das Bild um 90° im Uhrzeigersinn gedreht.
+       In Figma ist es 2276px breit bei 1440px Rahmen — der Ausschnitt ist
+       also an die BREITE gebunden (158,06 %), nicht an "cover". Der zweite
+       Wert greift nur bei sehr hohen Fenstern. */
+    background-image:
+      linear-gradient(var(--home-veil), var(--home-veil)),
+      url("/brand/home-bg-landscape.png");
+    background-size: 100% 100%, max(158.06vw, 222.23vh) auto;
+    background-position: center, 58.4% center;
+  }
+}
+
+.content {
+  padding: calc(3.9375 * var(--u)) calc(1.6875 * var(--u)) calc(9.5 * var(--u));
+}
+@media (min-width: 56rem) {
+  .content {
+    width: calc(68.625 * var(--u)); /* 1098px */
+    max-width: 100%;
+    margin: 0 auto;
+    padding: calc(4.25 * var(--u)) 0 calc(7.5 * var(--u)); /* 68px unter der Leiste */
+  }
+}
+
+.mascot {
+  position: fixed;
+  left: calc(1.0625 * var(--u)); /* 17px */
+  bottom: calc(0.75 * var(--u)); /* 12px */
+  z-index: 10;
+  width: calc(2.4375 * var(--u)); /* 39px */
+  height: calc(2.4375 * var(--u));
+  border-radius: 999px;
+  pointer-events: none;
+}
+@media (min-width: 56rem) {
+  .mascot {
+    left: calc(4.8125 * var(--u)); /* 77px */
+    bottom: calc(1.5 * var(--u)); /* 24px */
+    width: calc(3.8125 * var(--u)); /* 61px */
+    height: calc(3.8125 * var(--u));
+  }
+}
+
+/* Offline-/Sync-Zustand ist nicht Teil des Entwurfs, darf aber nicht
+   verschwinden — er sitzt unauffällig oben rechts. */
+.sync {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 25;
+}
+
 .skip {
   position: absolute;
   left: -9999px;
   top: 0;
   z-index: 100;
-  padding: var(--space-2) var(--space-4);
-  border-radius: 0 0 var(--radius-md) 0;
-  background: var(--color-accent);
-  color: var(--color-text-on-accent);
+  padding: 0.75rem 1rem;
+  border-radius: 0 0 0.75rem 0;
+  background: var(--home-accent);
+  color: var(--home-accent-fg);
 }
 .skip:focus {
   left: 0;
-}
-.topbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  padding-top: max(var(--space-3), env(safe-area-inset-top));
-  background: var(--glass-bg);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 1px 12px -6px rgba(16, 22, 47, 0.2);
-}
-.brandArea {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-width: 0;
-  flex-shrink: 1;
-  overflow: hidden;
-}
-.logo {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  color: var(--color-heading);
-  text-decoration: none;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.logo span {
-  color: var(--color-accent);
-}
-.userArea {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  flex-shrink: 0;
-}
-
-@media (max-width: 28rem) {
-  .logoPrefix {
-    display: none;
-  }
-}
-.content {
-  flex: 1;
-  width: 100%;
-  max-width: var(--content-max);
-  margin: 0 auto;
-  padding: var(--space-6) var(--space-4) var(--space-12);
-}
-@media (min-width: 48rem) {
-  .content {
-    padding: var(--space-8) var(--space-6) var(--space-12);
-  }
 }
