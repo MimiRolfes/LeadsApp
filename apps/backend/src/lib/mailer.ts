@@ -2,11 +2,10 @@ import { logger as log } from "@humatter-leads/shared/logger";
 import { env } from "../env";
 
 /**
- * E-Mail-Versand. Aktuell nur der `log`-Treiber: die Nachricht wird
- * strukturiert protokolliert (in Entwicklung inkl. Textvorschau), nicht
- * versendet. Ein echter SMTP-/Provider-Treiber wird ergänzt, sobald der
- * Anbieter feststeht (OQ-5). Bis dahin muss der Reset-Link manuell aus dem
- * Log entnommen bzw. der Admin ein Passwort direkt setzen.
+ * E-Mail-Versand — noch keiner: Die Nachricht wird strukturiert
+ * protokolliert (lokal inklusive Textvorschau), nicht versendet. Bis ein
+ * Anbieter feststeht (OQ-5), muss der Reset-Link aus dem Log entnommen oder
+ * das Passwort direkt gesetzt werden.
  */
 export interface Mail {
   to: string;
@@ -15,11 +14,6 @@ export interface Mail {
 }
 
 export async function sendMail(mail: Mail): Promise<void> {
-  if (env.MAIL_DRIVER === "smtp") {
-    throw new Error(
-      "SMTP-Treiber ist noch nicht implementiert (OQ-5: Anbieter offen).",
-    );
-  }
   log.info("mail_queued", {
     subject: mail.subject,
     // In Produktion keine Inhalte ins Log; lokal für die DX die Vorschau.

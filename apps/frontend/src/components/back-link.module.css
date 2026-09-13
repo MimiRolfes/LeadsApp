@@ -1,4 +1,14 @@
-.back {
+/* Rücksprung-Zeile. Link- und Knopf-Variante sehen gleich aus — der
+   Unterschied liegt nur im Ziel (bekannter Pfad vs. Browser-Verlauf). */
+.wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.link {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -11,8 +21,14 @@
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-muted);
+  text-decoration: none;
   cursor: pointer;
 }
-.back:hover {
+.link:hover {
   color: var(--color-text);
+}
+
+.context {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
 }

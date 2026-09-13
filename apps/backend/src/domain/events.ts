@@ -1,4 +1,4 @@
-import { and, asc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type {
   EventCreate,
   EventMemberAdd,
@@ -75,7 +75,7 @@ export async function listEventsForUser(
     const rows = await db
       .select({ event: events, leadCount: leadCountSql })
       .from(events)
-      .orderBy(asc(events.name));
+      .orderBy(desc(events.createdAt));
     return rows.map((r) => ({
       ...r.event,
       myRole: ctx.eventRole(r.event.id) ?? "admin",
@@ -91,7 +91,7 @@ export async function listEventsForUser(
     .from(eventMembers)
     .innerJoin(events, eq(events.id, eventMembers.eventId))
     .where(eq(eventMembers.userId, ctx.userId))
-    .orderBy(asc(events.name));
+    .orderBy(desc(events.createdAt));
   return rows.map((r) => ({
     ...r.event,
     myRole: r.role,

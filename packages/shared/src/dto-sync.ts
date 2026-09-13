@@ -26,7 +26,6 @@ export type SyncOperation = z.infer<typeof SyncOperationSchema>;
 export const SyncPushSchema = z.object({
   operations: z.array(SyncOperationSchema).min(1).max(200),
 });
-export type SyncPush = z.infer<typeof SyncPushSchema>;
 
 export type SyncResult = {
   localId: string;

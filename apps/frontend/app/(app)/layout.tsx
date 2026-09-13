@@ -1,18 +1,11 @@
 import type { ReactNode } from "react";
 import { requireSession } from "@/lib/session";
 import { AppNav } from "@/components/app-nav";
-import { HeaderBack } from "@/components/header-back";
+import { HeaderBack } from "@/components/back-link";
 import { SyncStatus } from "@/components/sync-status";
 import styles from "./app-shell.module.css";
 
-export default async function AppLayout({
-  children,
-  modal,
-}: {
-  children: ReactNode;
-  /** Paralleler Slot für Overlays (z. B. "Neues Event") über dem Inhalt. */
-  modal: ReactNode;
-}) {
+export default async function AppLayout({ children }: { children: ReactNode }) {
   const { user } = await requireSession();
 
   return (
@@ -27,8 +20,6 @@ export default async function AppLayout({
         <HeaderBack />
         {children}
       </main>
-
-      {modal}
 
       <div className={styles.sync}>
         <SyncStatus />

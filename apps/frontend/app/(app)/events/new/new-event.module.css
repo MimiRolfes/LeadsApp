@@ -1,25 +1,26 @@
 /*
  * "Neues Event" nach Figma "Messe"
- * (Desktop 57:480 hell / 57:505 dunkel, Handy 57:520).
+ * (Desktop 57:480 hell / 57:505 dunkel, Handy 57:520 hell / 71:53 dunkel).
  *
  * Das Panel ist dieselbe Glasfläche wie die Event-Karte auf der Startseite
  * (gleiche Füllung `--home-card`, gleiches Rezept aus Rand, Verlauf, Blur
  * und Schatten) — nur der Radius ist größer. Maße als Vielfache von `--u`
  * (siehe app-shell.module.css).
  *
- * HINWEIS: Im Handy-Frame sind nur Titel und Button gezeichnet, die
- * Feldzeilen fehlen im Entwurf. Ihre Handy-Maße sind deshalb aus dem
- * Desktop-Frame im selben Verhältnis abgeleitet, das der Entwurf auch bei
- * Login/Registrieren zwischen den Breakpoints verwendet (≈ 0,67).
+ * Handy-Karte 340x444: Pille 63x60 bei (261,16), Titel mittig auf y=46 mit
+ * Text ab x=29, Felder 303x42 (r=12) bei x=18 und y=118/197/276/355, Texte
+ * darin ab x=29 — also 11px innerhalb des Feldes, bündig mit dem Titel.
+ *
+ * Die Themes unterscheiden sich zwischen den Breakpoints: Auf dem Handy
+ * bleiben die Felder in BEIDEN Modi hell (#c5cdf7 mit dunklem Text), auf dem
+ * Desktop kehren sie sich im Dunkelmodus um. Deshalb stehen die Handy-Werte
+ * fest und der Desktop greift auf die Tokens zurück.
  */
 
 .panel {
   display: block;
-  padding: calc(1.5625 * var(--u)) calc(1.8125 * var(--u))
-    calc(2.1875 * var(--u));
+  padding: var(--u) calc(1.125 * var(--u)) calc(2.9375 * var(--u)); /* 16/18/47 */
   border-radius: calc(1.8125 * var(--u)); /* 29px (Handy) */
-  /* Figma zeichnet das Handy-Panel 444px hoch, auch wenn dort nur Titel und
-     Knopf stehen — die Mindesthöhe hält diese Proportion. */
   min-height: calc(27.75 * var(--u)); /* 444px */
   background-color: var(--home-card);
   background-image: var(--home-sheen);
@@ -45,7 +46,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: calc(2.5 * var(--u)); /* 40px (Handy, abgeleitet) */
+  margin-bottom: calc(2.625 * var(--u)); /* 42px (Pille endet 76, Feld 118) */
 }
 @media (min-width: 56rem) {
   .head {
@@ -61,10 +62,13 @@
   font-weight: 700;
   font-size: calc(1.5 * var(--u)); /* 24px */
   line-height: calc(2.625 * var(--u)); /* 42px */
+  /* Text beginnt bei x=29, das Feld bei x=18 — beide Texte fluchten. */
+  margin-left: calc(0.6875 * var(--u)); /* 11px */
   color: var(--home-card-title);
 }
 @media (min-width: 56rem) {
   .title {
+    margin-left: 0;
     font-size: calc(2 * var(--u)); /* 32px */
   }
 }
@@ -96,9 +100,29 @@
   color: var(--home-action-fg-mobile);
   cursor: pointer;
 }
+/* Dunkelmodus: auf dem Handy ist die Pille im Entwurf viel zurückhaltender
+   als auf dem Desktop (0,25 statt 0,49) — deshalb hier gesetzt und im
+   Desktop-Block wieder zurückgenommen. */
+:root[data-theme="dark"] .action {
+  background-color: rgba(197, 205, 247, 0.25);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .action {
+    background-color: rgba(197, 205, 247, 0.25);
+  }
+}
 @media (min-width: 56rem) {
   .action {
     color: var(--home-action-fg);
+  }
+  .action,
+  :root[data-theme="dark"] .action {
+    background-color: var(--home-action);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .action {
+      background-color: var(--home-action);
+    }
   }
 }
 .action:disabled {
@@ -137,40 +161,83 @@
 }
 
 /* --- Feldzeilen ------------------------------------------------------
-   Deckende Zeile mit Beschriftung links; die Eingabe läuft in derselben
-   Zeile weiter. Im Entwurf steht dort nur das Wort — als echtes Formular
-   braucht es die Eingabe daneben. */
+   Handy: das leere Feld zeigt nur einen Platzhalter, linksbündig 11px
+   innerhalb der Fläche (Figma 71:59 ff. hell / 71:73 ff. dunkel).
+   Desktop: Beschriftung links, Wert rechts (Figma 57:487 ff.). */
 .row {
+  position: relative;
   display: flex;
   align-items: center;
   gap: calc(0.75 * var(--u));
-  min-height: calc(2.625 * var(--u)); /* 42px (Handy, abgeleitet) */
-  padding: 0 var(--u);
+  height: calc(2.625 * var(--u)); /* 42px */
+  padding: 0 calc(0.6875 * var(--u)); /* 11px */
   border-radius: calc(0.75 * var(--u)); /* 12px */
-  background: var(--home-field);
+  /* Auf dem Handy bleiben die Felder in beiden Modi hell. */
+  background: #c5cdf7;
 }
 .row + .row {
-  margin-top: calc(1.0625 * var(--u)); /* 17px (Handy, abgeleitet) */
+  margin-top: calc(2.3125 * var(--u)); /* 37px (Feldoberkanten 79px Abstand) */
 }
 @media (min-width: 56rem) {
   .row {
+    height: auto;
     min-height: calc(3.875 * var(--u)); /* 62px */
+    padding: 0 var(--u);
+    background: var(--home-field);
   }
   .row + .row {
     margin-top: calc(1.5625 * var(--u)); /* 25px */
   }
 }
 
+/* Handy: nur für Screenreader — sichtbar steht dort der Platzhalter.
+   Desktop: die eigentliche Beschriftung in der Zeile. */
 .label {
-  flex: none;
-  font-family: var(--font-brand-sans);
-  font-weight: 700; /* Inria Sans Bold */
-  font-size: var(--u); /* 16px (Handy, abgeleitet) */
-  color: var(--home-field-label);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 @media (min-width: 56rem) {
   .label {
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
+    clip-path: none;
+    flex: none;
+    font-family: var(--font-brand-sans);
+    font-weight: 700; /* Inria Sans Bold */
     font-size: calc(1.5 * var(--u)); /* 24px */
+    color: var(--home-field-label);
+  }
+}
+
+/* Platzhalter im leeren Feld — nur Handy. Liegt über der Eingabe, damit die
+   Datumsfelder ihre native Maske behalten können. */
+.placeholder {
+  position: absolute;
+  left: calc(0.6875 * var(--u)); /* 11px */
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  font-family: var(--font-brand-sans);
+  font-weight: 400; /* Inria Sans Regular */
+  /* 16px Untergrenze: darunter zoomt iOS beim Antippen ins Feld hinein. */
+  font-size: max(16px, var(--u));
+  color: rgba(11, 20, 68, 0.5);
+}
+@media (min-width: 56rem) {
+  .placeholder {
+    display: none;
   }
 }
 
@@ -179,32 +246,47 @@
   min-width: 0;
   border: 0;
   background: none;
-  color: var(--home-field-fg);
+  color: #0b1444;
   font-family: var(--font-brand-sans);
-  font-size: var(--u);
-  text-align: right;
+  font-size: max(16px, var(--u)); /* s. Platzhalter: sonst zoomt iOS */
+  text-align: left;
 }
 @media (min-width: 56rem) {
   .input {
+    color: var(--home-field-fg);
     font-size: calc(1.5 * var(--u));
+    text-align: right;
+  }
+  .row:focus-within {
+    box-shadow: inset 0 0 0 2px var(--home-field-fg);
   }
 }
+/* Der Rahmen gehört auf die Feldfläche, nicht um die Eingabe herum — sonst
+   steht er über den Rundungen des Feldes. */
 .input:focus-visible {
-  outline: 2px solid var(--home-field-fg);
-  outline-offset: 4px;
-  border-radius: 0.25rem;
+  outline: none;
+}
+.row:focus-within {
+  box-shadow: inset 0 0 0 2px #0b1444;
+}
+/* Solange ein Datumsfeld leer und nicht im Fokus ist, steht dort der
+   Platzhalter aus dem Entwurf statt der nativen Maske "TT.MM.JJJJ". */
+.dateEmpty::-webkit-datetime-edit {
+  opacity: 0;
 }
 /* Der native Kalender-Knopf der Datumsfelder folgt der Textfarbe. */
 .input::-webkit-calendar-picker-indicator {
   cursor: pointer;
   opacity: 0.7;
 }
-:root[data-theme="dark"] .input::-webkit-calendar-picker-indicator {
-  filter: invert(1);
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .input::-webkit-calendar-picker-indicator {
+@media (min-width: 56rem) {
+  :root[data-theme="dark"] .input::-webkit-calendar-picker-indicator {
     filter: invert(1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .input::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+    }
   }
 }
 
@@ -237,10 +319,18 @@
 }
 
 /* --- Overlay ---------------------------------------------------------
-   "Neues Event" öffnet sich über der Übersicht: der Hintergrund wird
-   unscharf und leicht abgedunkelt, das Panel liegt darüber. Auf dem Handy
-   sitzt es oben (wie im Entwurf, Panel bei y=150), auf dem Desktop
-   ebenfalls im oberen Drittel (Panel bei y=203). */
+   "Neues Event" öffnet sich über der Übersicht. Auf dem Handy sitzt das
+   Panel oben (wie im Entwurf, y=150), auf dem Desktop im oberen Drittel
+   (y=203).
+
+   Das Overlay selbst ist nur Gerüst und bleibt immer voll deckend. Sichtbar
+   ist der Schleier darin — nur er blendet. Sonst würde beim Übergang in die
+   Karte das Panel mit ausblenden, statt sichtbar dorthin zu wandern.
+
+   Bewegt wird ausschließlich `opacity` und `transform`. Der Weichzeichner
+   bleibt konstant und kommt über die Deckkraft mit — billiger als eine
+   animierte Unschärfe und gleichzeitig mit dem Antippen. Dauern hier und in
+   events-view.tsx gehören zusammen. */
 .overlay {
   position: fixed;
   inset: 0;
@@ -250,9 +340,6 @@
   align-items: flex-start;
   padding: calc(5.5 * var(--u)) calc(1.6875 * var(--u)) calc(2 * var(--u));
   overflow-y: auto;
-  background: var(--home-scrim);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
 }
 @media (min-width: 56rem) {
   .overlay {
@@ -260,9 +347,95 @@
   }
 }
 
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--home-scrim);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  opacity: 0;
+  transition: opacity 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.overlay[data-shown] .scrim {
+  opacity: 1;
+}
+.overlay[data-state="exit"] .scrim {
+  opacity: 0;
+  transition-duration: 220ms;
+}
+.overlay[data-state="morph"] .scrim {
+  opacity: 0;
+  transition-duration: 420ms;
+}
+
 .dialog {
+  position: relative;
   width: min(calc(68.625 * var(--u)), 100%);
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.97);
+  transform-origin: top center;
+  transition:
+    opacity 260ms cubic-bezier(0.32, 0.72, 0, 1),
+    transform 300ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.overlay[data-shown] .dialog {
+  opacity: 1;
+  transform: none;
+}
+.overlay[data-state="exit"] .dialog {
+  opacity: 0;
+  transform: translateY(0.5rem) scale(0.98);
+  transition-duration: 220ms;
+}
+/* Beim Übergang in die Karte bewegt JavaScript den Maß-Rahmen `.dialog`
+   (Höhe und Position). Sichtbar ist aber `.panel` darin — dort sitzt das
+   Glas. Es muss also voll deckend bleiben und mitschrumpfen; ausblenden
+   darf nur sein INHALT, sonst reist eine leere Hülle zur Karte und der
+   Container scheint zu verschwinden. */
+.overlay[data-state="morph"] .dialog {
+  opacity: 1;
+  transform: none;
+}
+.overlay[data-state="morph"] .panel {
+  min-height: 0;
+  height: 100%;
+  /* Am Panel klippen, nicht am Rahmen darum: Der Schatten sitzt hier, und
+     ein Schnitt am Rahmen würde ihn beim Start des Übergangs schlagartig
+     abschneiden. */
+  overflow: hidden;
+  /* Auf dem Desktop ist das Panel runder als die Karte (37 zu 29) — sonst
+     springen die Ecken im Moment des Austauschs. */
+  border-radius: calc(1.8125 * var(--u));
+  transition: border-radius 420ms cubic-bezier(0.34, 1.24, 0.64, 1);
+}
+.overlay[data-state="morph"] .panel > * {
+  opacity: 0;
+  transition: opacity 160ms ease-out;
 }
 .dialog:focus {
   outline: none;
+}
+
+/* Solange der Schleier steht, ist der Hintergrund bereits weichgezeichnet.
+   Ein zweiter backdrop-filter darüber verändert das Bild praktisch nicht
+   (nachgemessen: kein sichtbarer Unterschied), kostet WebKit aber einen
+   kompletten weiteren Durchgang über 186.000 px² — verschachtelte
+   Weichzeichner sind dort ein bekannter Bremsklotz.
+
+   Beim Übergang in die Karte kommt das Glas zurück: Der Schleier weicht,
+   und am Ende muss das Panel exakt wie eine Event-Karte aussehen, sonst
+   springt die Optik im Moment des Austauschs. */
+.overlay:not([data-state="morph"]) .panel,
+.overlay:not([data-state="morph"]) .action {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay .scrim,
+  .overlay .dialog,
+  .overlay .panel,
+  .overlay .panel > * {
+    transition: none;
+  }
 }

@@ -81,7 +81,6 @@ const EnvSchema = z.object({
   SESSION_COOKIE_SECURE: z.enum(["auto", "true", "false"]).default("auto"),
 
   // --- Uploads / Objektspeicher ---
-  UPLOAD_DRIVER: z.enum(["local", "s3"]).default("local"),
   UPLOAD_LOCAL_DIR: z.string().default("./.data/uploads"),
   UPLOAD_MAX_BYTES: z.coerce
     .number()
@@ -94,20 +93,9 @@ const EnvSchema = z.object({
    * (manuelle Freigabe / späterer Scan-Hook). `true`/`false` erzwingen.
    */
   UPLOAD_AUTO_APPROVE: z.enum(["auto", "true", "false"]).default("auto"),
-  S3_ENDPOINT: z.string().url().optional(),
-  S3_REGION: z.string().optional(),
-  S3_BUCKET: z.string().optional(),
-  S3_ACCESS_KEY_ID: z.string().optional(),
-  S3_SECRET_ACCESS_KEY: z.string().optional(),
 
-  // --- E-Mail (Passwort-Reset) ---
-  MAIL_DRIVER: z.enum(["log", "smtp"]).default("log"),
+  // --- Passwort-Reset ---
   PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().positive().default(60),
-  SMTP_HOST: z.string().optional(),
-  SMTP_PORT: z.coerce.number().int().positive().max(65535).default(587),
-  SMTP_USER: z.string().optional(),
-  SMTP_PASSWORD: z.string().optional(),
-  MAIL_FROM: z.string().default("humatter Leads <no-reply@example.invalid>"),
 
   // --- Rate Limiting ---
   RATE_LIMIT_WINDOW_SECONDS: z.coerce.number().int().positive().default(60),

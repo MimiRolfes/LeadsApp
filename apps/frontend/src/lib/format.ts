@@ -1,3 +1,4 @@
+import { DEFAULT_LOCALE } from "@humatter-leads/shared";
 import type { LeadDto } from "./types";
 
 /** Anzeigename eines Leads (Fallback-Kaskade). */
@@ -13,7 +14,7 @@ export function formatDate(iso: string | null): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
     ? iso
-    : d.toLocaleDateString("de-DE", {
+    : d.toLocaleDateString(DEFAULT_LOCALE, {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
@@ -25,7 +26,7 @@ export function formatDateTime(iso: string | null): string {
   const d = new Date(iso);
   return Number.isNaN(d.getTime())
     ? iso
-    : d.toLocaleString("de-DE", {
+    : d.toLocaleString(DEFAULT_LOCALE, {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",

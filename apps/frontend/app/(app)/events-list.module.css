@@ -230,3 +230,9 @@
   font-family: var(--font-brand-sans);
   font-size: 1.0625rem;
 }
+
+/* Die frisch angelegte Karte ist noch unsichtbar, solange das Panel auf sie
+   zufährt — sie liegt aber schon im Layout, damit ihr Ziel messbar ist. */
+.card[data-pending] {
+  opacity: 0;
+}

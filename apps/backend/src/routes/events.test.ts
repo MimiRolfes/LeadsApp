@@ -193,6 +193,18 @@ describe("events & authz", () => {
     expect(names).toContain("Fremdes Event");
   });
 
+  it("lists the newest event first", async () => {
+    const mgr = await registerAndLogin("order@mindsewn.de");
+    for (const name of ["Zuerst", "Danach"]) {
+      await req("/api/events", mgr, { method: "POST", json: { name } });
+    }
+    const res = await req("/api/events", mgr);
+    const { events: list } = (await res.json()) as {
+      events: { name: string }[];
+    };
+    expect(list.map((e) => e.name)).toEqual(["Danach", "Zuerst"]);
+  });
+
   it("the event list reports how many leads were captured", async () => {
     const mgr = await registerAndLogin("count@mindsewn.de");
     const created = await req("/api/events", mgr, {

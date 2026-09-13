@@ -3,9 +3,8 @@ import { z } from "zod";
 /**
  * Validierte Umgebungskonfiguration des Frontends.
  *
- * Grundsatz: keine Infrastrukturwerte im Code. Der Browser bekommt nur
- * `NEXT_PUBLIC_*`. Serverseitige Werte (z. B. die interne Backend-URL)
- * verlassen den Server nie.
+ * Grundsatz: keine Infrastrukturwerte im Code. Serverseitige Werte (z. B.
+ * die interne Backend-URL) verlassen den Server nie.
  */
 const ServerSchema = z.object({
   NODE_ENV: z
@@ -16,10 +15,6 @@ const ServerSchema = z.object({
    * serverseitig für das /api-Proxying und SSR-Fetches genutzt.
    */
   BACKEND_INTERNAL_URL: z.string().url().default("http://localhost:8080"),
-});
-
-const PublicSchema = z.object({
-  NEXT_PUBLIC_APP_NAME: z.string().default("humatter Leads"),
 });
 
 function parse<S extends z.ZodTypeAny>(schema: S, src: unknown): z.infer<S> {
@@ -38,8 +33,4 @@ function parse<S extends z.ZodTypeAny>(schema: S, src: unknown): z.infer<S> {
 export const serverEnv = parse(ServerSchema, {
   NODE_ENV: process.env.NODE_ENV,
   BACKEND_INTERNAL_URL: process.env.BACKEND_INTERNAL_URL,
-});
-
-export const publicEnv = parse(PublicSchema, {
-  NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
 });

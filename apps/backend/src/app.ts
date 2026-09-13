@@ -14,7 +14,6 @@ import { attachmentRoutes } from "./routes/attachments";
 import { syncRoutes } from "./routes/sync";
 import { createHealthRoutes } from "./routes/health";
 import { ApiError, errors, toErrorResponse } from "./lib/errors";
-import { openapiDocument } from "./openapi";
 
 const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
@@ -32,7 +31,6 @@ export function createApp(deps: {
 
   // Liveness: vor allem anderen, kein DB-/Session-Zugriff (Docker HEALTHCHECK).
   app.route("/api/health", createHealthRoutes(deps.getDb));
-  app.get("/api/openapi.json", (c) => c.json(openapiDocument));
 
   const origins = corsOrigins();
   if (origins.length > 0) {

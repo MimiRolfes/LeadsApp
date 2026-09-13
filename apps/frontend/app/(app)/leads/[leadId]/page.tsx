@@ -3,7 +3,7 @@ import { ApiError, serverApi } from "@/lib/server-api";
 import type { EventDto, LeadDetailDto, QuestionDto } from "@/lib/types";
 import { LeadDetail } from "@/components/lead-detail";
 import { EventNav } from "@/components/event-nav";
-import { Crumb } from "@/components/crumb";
+import { BackLink } from "@/components/back-link";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export default async function LeadDetailPage({
 
   return (
     <div>
-      <Crumb
+      <BackLink
         href={`/events/${event.id}/leads`}
         label="Lead-Liste"
         context={event.name}

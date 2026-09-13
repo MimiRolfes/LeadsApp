@@ -204,7 +204,8 @@
   color: var(--brand-navy);
   font-family: var(--font-display);
   font-weight: 700; /* Inria Serif Bold */
-  font-size: 0.75rem; /* 12px */
+  /* Figma zeichnet 12px; darunter zoomt iOS beim Antippen ins Feld. */
+  font-size: 1rem; /* 16px */
   text-align: left;
 }
 @media (min-width: 56rem) {
@@ -283,7 +284,10 @@
   font-weight: 400; /* Inria Serif Regular */
   font-size: 0.8125rem; /* 13px */
   cursor: pointer;
-  transition: background-color 0.16s ease;
+  transition:
+    background-color 0.16s ease,
+    transform 0.12s cubic-bezier(0.32, 0.72, 0, 1),
+    filter 0.12s ease-out;
 }
 @media (min-width: 56rem) {
   .submit {

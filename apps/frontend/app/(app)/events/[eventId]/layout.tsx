@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ApiError, serverApi } from "@/lib/server-api";
 import type { EventDto } from "@/lib/types";
 import { EventNav } from "@/components/event-nav";
-import { Crumb } from "@/components/crumb";
+import { BackLink } from "@/components/back-link";
 
 export const dynamic = "force-dynamic";
 
@@ -30,7 +30,7 @@ export default async function EventLayout({
 
   return (
     <div>
-      <Crumb href="/" label="Alle Events" context={event.name} />
+      <BackLink href="/" label="Alle Events" context={event.name} />
       <EventNav eventId={eventId} isManager={isManager} />
       {children}
     </div>

@@ -14,7 +14,9 @@ describe("shared constants", () => {
   });
 
   it("defaults to German", () => {
-    expect(DEFAULT_LOCALE).toBe("de");
+    // Vollständiges BCP-47-Kürzel: Intl braucht die Region für die
+    // deutsche Datumsreihenfolge, und genau so formatiert das Frontend.
+    expect(DEFAULT_LOCALE).toBe("de-DE");
   });
 
   it("global roles match the DB enum (admin, member)", () => {

@@ -6,7 +6,7 @@
  * auf Basis dieser Marken-Tokens gestaltet. Herleitung: docs/design-system.md
  *
  * Oberfläche: "Liquid Glass" — Panels sind lichtdurchlässiges, mattiertes Glas
- * über einer weichen Aurora aus den Markenfarben. Die Marke (Navy, Blau,
+ * über den Markenfarben. Die Marke (Navy, Blau,
  * Lavendel, Inria Serif) bleibt erhalten; nur das Material ändert sich.
  * Kontrast, `prefers-reduced-transparency` und `backdrop-filter`-Fallback
  * siehe unten — Text liegt immer auf ausreichend deckendem Glas.
@@ -14,7 +14,7 @@
  * Rohwerte aus Figma:
  *   - dunkel-blau  #001540   (Headline-/Textfarbe)
  *   - akzent-blau  #0c6cfd   (Links, Betonung, primäre Aktion)
- *   - lavendel     #c5cdf7   (Marken-Flächen, Aurora)
+ *   - lavendel     #c5cdf7   (Marken-Flächen)
  *   - schrift:     Inria Serif (Display) / Inter (UI, Body)
  */
 
@@ -53,7 +53,7 @@
   --color-text-on-accent: var(--neutral-0);
   /* Etwas dunkler als das reine Marken-Blau, damit kleiner Link-/UI-Text auf
      hellem Glas WCAG AA (4.5:1) erreicht. Reines --brand-blue bleibt für
-     Aurora, Füllflächen und Badges. */
+     Füllflächen und Badges. */
   --color-accent: #0a58d0;
   --color-accent-hover: #083f9c;
   --color-focus-ring: #0c6cfd;
@@ -70,24 +70,6 @@
     0 4px 12px -4px rgba(20, 24, 66, 0.16);
   --glass-tint-accent: rgba(12, 108, 253, 0.14);
   --glass-sheen: rgba(255, 255, 255, 0.3);
-
-  /* --- Aurora-Hintergrund (Light) --- */
-  --aurora:
-    radial-gradient(
-      62% 48% at 10% -6%,
-      color-mix(in srgb, var(--brand-lavender) 95%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      50% 42% at 106% 6%,
-      color-mix(in srgb, var(--brand-blue) 38%, transparent),
-      transparent 56%
-    ),
-    radial-gradient(
-      74% 60% at 50% 112%,
-      color-mix(in srgb, var(--brand-lavender) 70%, transparent),
-      transparent 60%
-    );
 
   /* --- Typografie ---
      Fließend (clamp): ein enger Größenkorridor, damit Handy und Desktop
@@ -157,23 +139,6 @@
     --glass-shadow: 0 14px 40px -14px rgba(0, 0, 0, 0.6);
     --glass-tint-accent: rgba(91, 155, 255, 0.2);
     --glass-sheen: rgba(255, 255, 255, 0.07);
-
-    --aurora:
-      radial-gradient(
-        58% 44% at 10% -6%,
-        color-mix(in srgb, var(--brand-blue) 42%, transparent),
-        transparent 60%
-      ),
-      radial-gradient(
-        50% 40% at 106% 6%,
-        color-mix(in srgb, #7c3aed 34%, transparent),
-        transparent 58%
-      ),
-      radial-gradient(
-        76% 60% at 50% 112%,
-        color-mix(in srgb, var(--brand-navy-soft) 90%, transparent),
-        transparent 60%
-      );
   }
 }
 
@@ -197,23 +162,6 @@
   --glass-shadow: 0 14px 40px -14px rgba(0, 0, 0, 0.6);
   --glass-tint-accent: rgba(91, 155, 255, 0.2);
   --glass-sheen: rgba(255, 255, 255, 0.07);
-
-  --aurora:
-    radial-gradient(
-      58% 44% at 10% -6%,
-      color-mix(in srgb, var(--brand-blue) 42%, transparent),
-      transparent 60%
-    ),
-    radial-gradient(
-      50% 40% at 106% 6%,
-      color-mix(in srgb, #7c3aed 34%, transparent),
-      transparent 58%
-    ),
-    radial-gradient(
-      76% 60% at 50% 112%,
-      color-mix(in srgb, var(--brand-navy-soft) 90%, transparent),
-      transparent 60%
-    );
 }
 
 :root[data-theme="light"] {
@@ -232,7 +180,6 @@
     --glass-blur: none;
     --glass-border: var(--color-border);
     --glass-highlight: none;
-    --aurora: none;
   }
 }
 
@@ -254,6 +201,9 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  /* Platz für die Bildlaufleiste immer freihalten: Sonst springt das Layout
+     in dem Moment, in dem ein Overlay das Scrollen der Seite sperrt. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -264,16 +214,6 @@ body {
   font-size: var(--text-base);
   line-height: var(--leading-normal);
   -webkit-font-smoothing: antialiased;
-}
-
-/* Aurora: fest hinter dem Inhalt, statisch (keine Animation → Akku/Perf). */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background: var(--aurora), var(--color-bg);
-  background-attachment: fixed;
 }
 
 h1,
@@ -446,5 +386,39 @@ a {
   :root[data-theme="dark"] {
     --home-panel: #23305e;
     --home-card: #1d3a7a;
+  }
+}
+
+/* Rückmeldung auf Bedienung.
+ * Drücken gilt überall — am Stand wird getippt, nicht gezeigt. Der
+ * Zeiger-Effekt hängt an `hover: hover`, damit ihn Touchgeräte nicht nach
+ * dem Tippen "kleben" lassen. */
+button,
+a[href] {
+  transition: transform 140ms cubic-bezier(0.32, 0.72, 0, 1);
+  /* Ohne diese Angabe wartet iOS nach dem Tippen ab, ob ein Doppeltipp zum
+     Zoomen folgt, und verzögert den Klick spürbar. Seitliches Wischen und
+     Zwei-Finger-Zoom bleiben erhalten. */
+  touch-action: manipulation;
+}
+@media (hover: hover) {
+  button:not(:disabled):hover,
+  a[href]:hover {
+    transform: scale(1.02);
+  }
+}
+/* Nach dem Zeiger-Effekt, damit Drücken über Überfahren gewinnt. */
+button:not(:disabled):active,
+a[href]:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  button,
+  a[href] {
+    transition: none;
+  }
+  button:active,
+  a[href]:active {
+    transform: none;
   }
 }

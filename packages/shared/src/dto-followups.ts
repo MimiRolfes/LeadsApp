@@ -26,7 +26,6 @@ export const FollowupListQuerySchema = z.object({
   assigneeId: z.string().uuid().optional(),
   due: z.enum(["today", "overdue", "upcoming"]).optional(),
 });
-export type FollowupListQuery = z.infer<typeof FollowupListQuerySchema>;
 
 export const FollowupTemplateCreateSchema = z.object({
   name: z.string().trim().min(1).max(120),
