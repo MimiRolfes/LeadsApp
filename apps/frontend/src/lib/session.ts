@@ -4,7 +4,6 @@ import { ApiError, serverApi } from "./server-api";
 
 export interface SessionInfo {
   user: CurrentUser;
-  twoFactorEnabled: boolean;
 }
 
 /** Aktuelle Session oder null (RSC). */

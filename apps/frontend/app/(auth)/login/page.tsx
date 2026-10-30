@@ -13,8 +13,6 @@ function LoginForm() {
   const next = params.get("next") || "/";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [code, setCode] = useState("");
-  const [needsCode, setNeedsCode] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -23,21 +21,12 @@ function LoginForm() {
     setBusy(true);
     setError(null);
     try {
-      await apiPost("/auth/login", {
-        email,
-        password,
-        ...(needsCode && code ? { code } : {}),
-      });
+      await apiPost("/auth/login", { email, password });
       window.location.assign(next);
     } catch (err) {
-      if (err instanceof ApiError && err.code === "totp_required") {
-        setNeedsCode(true);
-        setError("Bitte den Code aus deiner Authenticator-App eingeben.");
-      } else {
-        setError(
-          err instanceof ApiError ? err.message : "Anmeldung fehlgeschlagen.",
-        );
-      }
+      setError(
+        err instanceof ApiError ? err.message : "Anmeldung fehlgeschlagen.",
+      );
       setBusy(false);
     }
   }
@@ -65,18 +54,6 @@ function LoginForm() {
         value={password}
         onChange={(e) => setPassword(e.target.value)}
       />
-      {needsCode ? (
-        <AuthField
-          id="code"
-          label="2FA-Code"
-          placeholder="6-stelliger Code"
-          inputMode="numeric"
-          autoComplete="one-time-code"
-          pattern="\d{6}"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-        />
-      ) : null}
       <div className={styles.foot}>
         <Link href="/register">Konto anlegen</Link>
         <Link href="/forgot-password">Passwort vergessen?</Link>

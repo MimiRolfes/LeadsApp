@@ -49,7 +49,9 @@ function prefersReducedMotion(): boolean {
 
 export function EventsView({ initialEvents }: { initialEvents: EventDto[] }) {
   const [events, setEvents] = useState(initialEvents);
-  const [dialog, setDialog] = useState<"enter" | "exit" | "morph" | null>(null);
+  const [dialog, setDialog] = useState<
+    "enter" | "exit" | "submitting" | "morph" | null
+  >(null);
   /** Karte, die noch unsichtbar ist, weil das Panel gerade auf sie zufährt. */
   const [pendingId, setPendingId] = useState<string | null>(null);
 
@@ -227,6 +229,11 @@ export function EventsView({ initialEvents }: { initialEvents: EventDto[] }) {
           panelRef={panelRef}
           onClose={close}
           onCreated={created}
+          // Sofort beim Druck reagieren, statt auf die Antwort des Servers
+          // zu warten: Der Inhalt löst sich auf, die Fläche wandert, sobald
+          // feststeht, wohin. Bei einem Fehler geht beides zurück.
+          onSubmitStart={() => setDialog("submitting")}
+          onSubmitFailed={() => setDialog("enter")}
         />
       ) : null}
     </>

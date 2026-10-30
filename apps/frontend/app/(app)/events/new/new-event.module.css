@@ -391,11 +391,19 @@
    (Höhe und Position). Sichtbar ist aber `.panel` darin — dort sitzt das
    Glas. Es muss also voll deckend bleiben und mitschrumpfen; ausblenden
    darf nur sein INHALT, sonst reist eine leere Hülle zur Karte und der
-   Container scheint zu verschwinden. */
+   Container scheint zu verschwinden.
+
+   "submitting" gilt ab dem Tastendruck, "morph" erst, wenn der Server
+   geantwortet hat und feststeht, wohin die Fläche wandert. Der Inhalt löst
+   sich also sofort auf — man sieht die Reaktion, statt auf das Netz zu
+   warten. Der Schleier bleibt solange stehen und geht erst mit der
+   Bewegung. */
+.overlay[data-state="submitting"] .dialog,
 .overlay[data-state="morph"] .dialog {
   opacity: 1;
   transform: none;
 }
+.overlay[data-state="submitting"] .panel,
 .overlay[data-state="morph"] .panel {
   min-height: 0;
   height: 100%;
@@ -408,6 +416,7 @@
   border-radius: calc(1.8125 * var(--u));
   transition: border-radius 420ms cubic-bezier(0.34, 1.24, 0.64, 1);
 }
+.overlay[data-state="submitting"] .panel > *,
 .overlay[data-state="morph"] .panel > * {
   opacity: 0;
   transition: opacity 160ms ease-out;

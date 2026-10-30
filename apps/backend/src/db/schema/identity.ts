@@ -27,7 +27,6 @@ export const users = pgTable(
     displayName: text("display_name").notNull(),
     status: userStatus("status").notNull().default("active"),
     globalRole: globalRole("global_role").notNull().default("member"),
-    totpSecret: text("totp_secret"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

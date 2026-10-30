@@ -15,6 +15,13 @@
       "when": 1788193935964,
       "tag": "0001_audit_log_append_only",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789308862624,
+      "tag": "0002_drop_totp_secret",
+      "breakpoints": true
     }
   ]
 }

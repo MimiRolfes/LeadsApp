@@ -82,8 +82,15 @@ export function NewEventForm({
    * bleibt es bei der Navigation zur Übersicht.
    */
   onCreated,
+  onSubmitStart,
+  onSubmitFailed,
 }: {
   onCreated?: (event: EventDto) => void | Promise<void>;
+  /** Beim Absenden — die Übersicht beginnt sofort auszublenden, statt auf
+   *  die Antwort des Servers zu warten. */
+  onSubmitStart?: () => void;
+  /** Fehlgeschlagen — die Übersicht macht das Ausblenden rückgängig. */
+  onSubmitFailed?: () => void;
 } = {}) {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
@@ -108,6 +115,7 @@ export function NewEventForm({
       return;
     }
     setBusy(true);
+    onSubmitStart?.();
     try {
       const { event } = await apiPost<{ event: EventDto }>(
         "/events",
@@ -122,6 +130,7 @@ export function NewEventForm({
       // Event wiederherstellt. Dasselbe Vorgehen nutzt die Anmeldung.
       window.location.assign("/");
     } catch (err) {
+      onSubmitFailed?.();
       setError(err instanceof ApiError ? err.message : "Fehlgeschlagen.");
       setBusy(false);
     }

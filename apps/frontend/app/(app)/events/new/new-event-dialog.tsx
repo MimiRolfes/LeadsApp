@@ -25,12 +25,16 @@ export function NewEventDialog({
   panelRef,
   onClose,
   onCreated,
+  onSubmitStart,
+  onSubmitFailed,
 }: {
   /** "enter" fährt auf, "exit" blendet ab, "morph" geht in die neue Karte über. */
-  state: "enter" | "exit" | "morph";
+  state: "enter" | "exit" | "submitting" | "morph";
   panelRef: RefObject<HTMLDivElement | null>;
   onClose: () => void;
   onCreated: (event: EventDto) => void | Promise<void>;
+  onSubmitStart: () => void;
+  onSubmitFailed: () => void;
 }) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -81,7 +85,11 @@ export function NewEventDialog({
         aria-label="Neues Event"
         className={styles.dialog}
       >
-        <NewEventForm onCreated={onCreated} />
+        <NewEventForm
+          onCreated={onCreated}
+          onSubmitStart={onSubmitStart}
+          onSubmitFailed={onSubmitFailed}
+        />
       </div>
     </div>
   );

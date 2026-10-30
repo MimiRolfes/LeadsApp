@@ -4,7 +4,6 @@ import { createTestDb, type TestDb } from "../db/testing/pglite";
 import { makeClient } from "../db/testing/http";
 import { passwordResetTokens, users } from "../db/schema";
 import { generateToken, hashToken } from "../lib/tokens";
-import { currentCode } from "../lib/totp";
 import { __resetRateLimit } from "../lib/rate-limit";
 
 let db: TestDb;
@@ -74,58 +73,5 @@ describe("password reset", () => {
       password: PW + "x",
     });
     expect(res.status).toBe(400);
-  });
-});
-
-describe("optional 2FA (TOTP)", () => {
-  it("enables 2FA, then requires the code on login, then disables it", async () => {
-    const email = "tfa@mindsewn.de";
-    const cookie = await client.login(email);
-
-    const setup = (await (
-      await jpost("/api/auth/2fa/setup", {}, cookie)
-    ).json()) as { secret: string; otpauthUri: string };
-    expect(setup.otpauthUri).toContain("otpauth://totp/");
-
-    const badEnable = await jpost(
-      "/api/auth/2fa/enable",
-      { secret: setup.secret, code: "000000" },
-      cookie,
-    );
-    expect(badEnable.status).toBe(400);
-
-    const enable = await jpost(
-      "/api/auth/2fa/enable",
-      { secret: setup.secret, code: currentCode(setup.secret) },
-      cookie,
-    );
-    expect(enable.status).toBe(200);
-
-    // Login ohne Code
-    const noCode = await client.req("/api/auth/login", "", {
-      method: "POST",
-      json: { email, password: PW },
-    });
-    expect(noCode.status).toBe(401);
-    expect(
-      ((await noCode.json()) as { error: { code: string } }).error.code,
-    ).toBe("totp_required");
-
-    // Login mit Code
-    const withCode = await client.req("/api/auth/login", "", {
-      method: "POST",
-      json: { email, password: PW, code: currentCode(setup.secret) },
-    });
-    expect(withCode.status).toBe(200);
-    const freshCookie = (withCode.headers.get("set-cookie") ?? "").split(
-      ";",
-    )[0]!;
-
-    const disable = await jpost(
-      "/api/auth/2fa/disable",
-      { code: currentCode(setup.secret) },
-      freshCookie,
-    );
-    expect(disable.status).toBe(204);
   });
 });

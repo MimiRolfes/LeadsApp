@@ -13,7 +13,6 @@ import { audit } from "../domain/audit";
 import { hashPassword, verifyPassword } from "../lib/password";
 import { generateToken, hashToken } from "../lib/tokens";
 import { sendMail } from "../lib/mailer";
-import { verify as verifyTotp } from "../lib/totp";
 import { errors } from "../lib/errors";
 
 // Gültiger Argon2id-Hash eines Zufallswerts. Wird verglichen, wenn kein
@@ -154,23 +153,6 @@ export async function authenticateUser(
     );
   }
 
-  // 2FA, falls für das Konto aktiv.
-  if (user.totpSecret) {
-    if (!input.code || !verifyTotp(user.totpSecret, input.code)) {
-      await writeAudit(db, {
-        actorId: user.id,
-        action: "user.login_failed",
-        entityId: user.id,
-        ip: ctx.ip,
-        metadata: { reason: "totp" },
-      });
-      throw errors.unauthorized(
-        "totp_required",
-        "Bitte den Code aus deiner Authenticator-App eingeben.",
-      );
-    }
-  }
-
   await writeAudit(db, {
     actorId: user.id,
     action: "user.login",
@@ -265,49 +247,6 @@ export async function resetPassword(
       entityId: row.userId,
       ip: params.ip,
     });
-  });
-}
-
-// --- 2FA (TOTP, optional) ---------------------------------------
-
-export async function enableTotp(
-  db: Db,
-  params: { userId: string; secret: string; code: string },
-): Promise<void> {
-  if (!verifyTotp(params.secret, params.code)) {
-    throw errors.badRequest("totp_invalid", "Code stimmt nicht.");
-  }
-  await db
-    .update(users)
-    .set({ totpSecret: params.secret })
-    .where(eq(users.id, params.userId));
-  await audit(db, {
-    actorId: params.userId,
-    action: "user.2fa_enabled",
-    entityType: "user",
-    entityId: params.userId,
-  });
-}
-
-export async function disableTotp(
-  db: Db,
-  params: { user: UserRow; code: string },
-): Promise<void> {
-  if (
-    !params.user.totpSecret ||
-    !verifyTotp(params.user.totpSecret, params.code)
-  ) {
-    throw errors.badRequest("totp_invalid", "Code stimmt nicht.");
-  }
-  await db
-    .update(users)
-    .set({ totpSecret: null })
-    .where(eq(users.id, params.user.id));
-  await audit(db, {
-    actorId: params.user.id,
-    action: "user.2fa_disabled",
-    entityType: "user",
-    entityId: params.user.id,
   });
 }
 
